@@ -1,0 +1,107 @@
+# __PROJECT_NAME__ -- ServiceNow Development Workspace
+
+## Project
+- **Scope:** __SCOPE__
+- **Instance:** __INSTANCE__.service-now.com
+- **Platform:** ServiceNow (scoped application, domain-separated)
+- **Script sync:** sn-scriptsync v4.2+ (bi-directional file sync via SN Utils browser extension)
+- **Tooling:** sn-toolkit Claude Code plugin (agents, commands, hooks, rules, bin scripts)
+
+## Directory Structure
+```
+__INSTANCE__/                     -- sn-scriptsync BI-DIRECTIONAL sync workspace
+  __SCOPE__/                      -- scoped app files (scripts, widgets, BRs)
+  global/                         -- global scope files
+instances/__INSTANCE__/           -- Agent API workspace (NOT synced to SN)
+  agent/requests/                 -- Agent API request JSON
+  agent/responses/                -- Agent API response JSON
+docs/                             -- Project-specific docs
+  architecture/                   -- Schema + overview extracted from instance
+  context/                        -- Living project status trackers
+  reference/                      -- Large reference docs (load on demand only)
+  requirements/                   -- Feature requirements
+scratch/                          -- Debug artifacts (gitignored)
+credentials/                      -- Encrypted SN credentials (gitignored)
+.claude/project.json              -- {scope, instance} -- consumed by plugin hooks
+```
+
+The sn-toolkit plugin provides all shared infrastructure (agents, commands, hooks,
+rules, autocomplete, sn-agent-api.ps1, sn-credentials.ps1, bootstrap-project.ps1).
+Nothing is duplicated into this workspace.
+
+## Critical Rules
+1. **ASCII only** (U+0000-U+007F) in ALL ServiceNow code, descriptions, work notes, HTML fields
+2. **UTF-8 without BOM** for all files written to disk
+3. **SN scripting standards** live in the sn-toolkit plugin's `rules/` -- Claude auto-loads them
+4. **NEVER use `Out-File -Encoding utf8`** for ServiceNow files -- it adds BOM. Use `[System.IO.File]::WriteAllText()` with `UTF8Encoding($false)`
+5. **Two workspace folders** -- `__INSTANCE__/` (syncs to SN) vs `instances/__INSTANCE__/` (local only)
+6. **Anti-truncation:** Save all `query_records` results to JSON file, then read back. NEVER copy sys_ids from console output.
+
+## Agent API Setup
+
+Claude Code uses Git Bash, but the Agent API is PowerShell. The plugin puts its
+`bin/` on your Bash PATH, so `sn-agent-api.ps1` resolves by bare name.
+
+```bash
+INSTANCE_DIR="__PROJECT_DIR__/instances/__INSTANCE__"
+powershell.exe -NoProfile -Command "& sn-agent-api.ps1 -InstanceDir '$INSTANCE_DIR' -Command 'check_connection' | ConvertTo-Json -Depth 5"
+```
+
+**PowerShell variable equivalents (for use inside -Command strings):**
+```powershell
+$instanceDir = "__PROJECT_DIR_WIN__\instances\__INSTANCE__"
+# sn-agent-api.ps1 is on PATH via the plugin's bin/
+```
+
+## Essential Commands
+| Command | Purpose | When |
+|---------|---------|------|
+| `check_connection` | Verify SN + browser connection | FIRST, every session |
+| `clear_last_error` | Clean slate | After check_connection |
+| `query_records` | Read any SN table | Data lookups |
+| `create_artifact` | Create new SN record | New scripts/widgets/BRs (always include `scope`) |
+| `update_record` | Update single field | Edit existing record |
+| `update_record_batch` | Update multiple fields | Widget edits |
+| `sync_now` | Flush pending file syncs | LAST, before reporting done |
+| `get_last_error` | Check for async errors | After sync_now |
+
+## Session Lifecycle
+```
+1. /sn-toolkit:start             -- checks connection, loads project context
+2. clear_last_error              -- fresh error state
+3. [global scope work only] switch_context to correct update set
+4. Do work (create_artifact, update_record, file edits)
+5. sync_now                       -- flush pending file syncs
+6. get_last_error                 -- verify no async errors
+7. /sn-toolkit:end                -- wrap up
+```
+
+## Session Scratchpad
+For multi-artifact sessions (3+ widgets/scripts), write intermediate decisions,
+sys_ids, and field values to `scratch/session-notes.md` and read them back as
+needed. Keeps working context compact on long flows.
+
+## sn-scriptsync File Naming
+```
+{instance}/{scope}/{table}/{artifact}.{field}.{ext}
+```
+- `MyUtils.script.js` -- Script Include
+- `MyBR.script.js` -- Business Rule
+- `MyWidget/script.js` -- Widget server script
+- `MyWidget/client_script.js` -- Widget client script
+- `MyWidget/template.html` -- Widget template
+- `MyWidget/css.scss` -- Widget styles
+- NEVER create files for config fields (collection, when, active, order)
+
+## Plugin Slash Commands (most used)
+- `/sn-toolkit:start` -- verify connection, load context
+- `/sn-toolkit:end` -- flush syncs, check errors, wrap session
+- `/sn-toolkit:creds` -- configure SN credentials for this workspace
+- `/sn-toolkit:list` -- list artifacts on the instance
+- `/sn-toolkit:pull` -- pull a single record to temp and display
+- `/sn-toolkit:widget` -- widget creation/edit workflow
+- `/sn-toolkit:review` -- code review via the sn-reviewer agent
+
+## Key References (load on demand)
+- `docs/architecture/schema-catalog.md` -- Table/field schema
+- Plugin's `rules/` -- SN scripting standards, testing, UI components, conventions

@@ -1,0 +1,71 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.ps1\"",
+            "shell": "powershell",
+            "timeout": 30,
+            "statusMessage": "Connecting to ServiceNow..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/tool-guard.ps1\" -Event PreToolUse; exit $LASTEXITCODE",
+            "shell": "powershell",
+            "timeout": 5,
+            "statusMessage": "Checking SN safety rules..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/tool-guard.ps1\" -Event PostToolUse; exit $LASTEXITCODE",
+            "shell": "powershell",
+            "timeout": 5,
+            "statusMessage": "Validating SN file..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/session-checkpoint.ps1\" -Event Stop",
+            "shell": "powershell",
+            "timeout": 10,
+            "statusMessage": "Checking for SN errors..."
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/session-checkpoint.ps1\" -Event PostCompact",
+            "shell": "powershell",
+            "timeout": 15,
+            "statusMessage": "Re-injecting SN session state..."
+          }
+        ]
+      }
+    ]
+  }
+}

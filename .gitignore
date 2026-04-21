@@ -1,0 +1,19 @@
+# OS detritus
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs
+*.log
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Local-only plugin install artifacts (should never appear in repo, but belt-and-suspenders)
+cache/
+installed_plugins.json
+
+# Node (if anyone adds tooling)
+node_modules/

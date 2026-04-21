@@ -1,0 +1,26 @@
+# ServiceNow credentials (DPAPI encrypted, but still sensitive)
+credentials/
+
+# sn-scriptsync auto-generated (redundant with plugin rules/)
+agentinstructions.md
+
+# Scratch/debug artifacts (historical, not indexed by AI)
+scratch/
+
+# Agent API temp files
+instances/*/agent/tmp/
+
+# Claude Code personal settings and session state
+.claude/settings.local.json
+
+# Logs
+audit.log
+debug.log
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# OS files
+Thumbs.db
+.DS_Store
