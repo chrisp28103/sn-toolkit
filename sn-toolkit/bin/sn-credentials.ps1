@@ -1,39 +1,59 @@
 <#
 .SYNOPSIS
-    Securely retrieves stored ServiceNow credentials for REST API calls.
+    Store or load ServiceNow credentials (DPAPI-encrypted, Windows-only).
+
 .DESCRIPTION
-    Reads DPAPI-encrypted .clixml credential files from <workspace>/.agent/credentials/
-    and returns a hashtable with Headers (Basic Auth), Credential, and BaseUrl.
+    Action "load" (default) retrieves stored credentials and returns a hashtable
+    with Headers (Basic Auth), BaseUrl (from project.json), Credential, etc.
 
-    Workspace root is discovered by walking up from -WorkspaceRoot (default: the
-    current working directory) until a .claude/project.json is found. Instance
-    URLs are read from that file:
+    Action "store" encrypts a username + password into .agent/credentials/sn-<instance>.clixml
+    using Windows DPAPI. The file can ONLY be decrypted by the same user on the
+    same machine.
 
-        {
-          "scope":    "x_...",
-          "instance": "<dev-sync-instance-short-name>",
-          "devUrl":   "https://<dev>.service-now.com",    // optional; default inferred from 'instance'
-          "prodUrl":  "https://<prod>.service-now.com"    // required for -Instance prod
-        }
+    Workspace root is discovered by walking up from $PWD (or -WorkspaceRoot).
+    The .claude/project.json in that workspace must define the base URL for the
+    requested instance (devUrl / prodUrl), or an 'instance' field for dev
+    auto-inference.
 
-    Passwords are NEVER displayed in plain text.
+.PARAMETER Action
+    "load" (default) or "store".
+
 .PARAMETER Instance
-    Which ServiceNow instance to load credentials for: "dev" or "prod"
+    "dev" or "prod". Picks the credential file (sn-<instance>.clixml) and, for
+    load, the base URL from project.json.
+
+.PARAMETER Username
+    Required for -Action store.
+
+.PARAMETER Password
+    Password for -Action store. Accepts a plain string OR a SecureString.
+    If omitted, prompts interactively (Read-Host -AsSecureString).
+
 .PARAMETER WorkspaceRoot
-    Project workspace root. Defaults to walking up from the current working
-    directory looking for .claude/project.json. Pass explicitly to override
-    (e.g., when calling from outside a project directory).
+    Project workspace root. Defaults to walking up from CWD until a
+    .claude/project.json is found.
+
 .EXAMPLE
-    $auth = & sn-credentials.ps1 -Instance "prod"
+    $auth = & sn-credentials.ps1 -Instance prod
     Invoke-RestMethod -Uri "$($auth.BaseUrl)/api/now/table/incident" -Headers $auth.Headers
+
 .EXAMPLE
-    $auth = & sn-credentials.ps1 -Instance "dev" -WorkspaceRoot "C:\path\to\project"
+    & sn-credentials.ps1 -Action store -Instance prod -Username "me@x.com"
+    # prompts for password securely
+
+.EXAMPLE
+    & sn-credentials.ps1 -Action store -Instance prod -Username "me@x.com" -Password "secret"
 #>
 param(
+    [ValidateSet("load", "store")]
+    [string]$Action = "load",
+
     [Parameter(Mandatory = $true)]
     [ValidateSet("dev", "prod")]
     [string]$Instance,
 
+    [string]$Username,
+    [object]$Password,
     [string]$WorkspaceRoot
 )
 
@@ -53,7 +73,6 @@ function Find-WorkspaceRoot {
     return $null
 }
 
-# Resolve workspace root
 if (-not $WorkspaceRoot) {
     $WorkspaceRoot = Find-WorkspaceRoot -StartDir $PWD.Path
     if (-not $WorkspaceRoot) {
@@ -66,7 +85,6 @@ Pass -WorkspaceRoot explicitly, or run from within a project directory.
     }
 }
 
-# Load project config
 $projectFile = Join-Path $WorkspaceRoot ".claude\project.json"
 if (-not (Test-Path $projectFile)) {
     Write-Error "Project config not found at '$projectFile'."
@@ -78,6 +96,42 @@ try {
     Write-Error "Failed to parse '$projectFile': $_"
     exit 1
 }
+
+$credDir  = Join-Path $WorkspaceRoot ".agent\credentials"
+$credFile = Join-Path $credDir "sn-$Instance.clixml"
+
+# ---------- STORE ----------
+if ($Action -eq "store") {
+    if (-not $Username) {
+        Write-Error "-Username is required for -Action store."
+        exit 1
+    }
+
+    if (-not (Test-Path $credDir)) {
+        New-Item -ItemType Directory -Path $credDir -Force | Out-Null
+    }
+
+    # Resolve the password into a SecureString
+    if ($null -eq $Password) {
+        $securePass = Read-Host -Prompt "Password for $Username on $Instance" -AsSecureString
+    } elseif ($Password -is [System.Security.SecureString]) {
+        $securePass = $Password
+    } else {
+        $securePass = ConvertTo-SecureString -String ([string]$Password) -AsPlainText -Force
+    }
+
+    $credential = New-Object System.Management.Automation.PSCredential($Username, $securePass)
+    $credential | Export-Clixml -Path $credFile
+
+    return @{
+        Action   = "store"
+        Instance = $Instance
+        Username = $Username
+        File     = $credFile
+    }
+}
+
+# ---------- LOAD (default) ----------
 
 # Determine base URL
 $baseUrl = $null
@@ -104,18 +158,15 @@ $hint
     exit 1
 }
 
-# Locate credential file
-$credFile = Join-Path $WorkspaceRoot ".agent\credentials\sn-$Instance.clixml"
 if (-not (Test-Path $credFile)) {
     Write-Error @"
 No stored credentials found for '$Instance'.
 Expected file: $credFile
-Run the credential setup workflow to store your credentials securely.
+Run: sn-credentials.ps1 -Action store -Instance $Instance -Username "..."
 "@
     exit 1
 }
 
-# Import the encrypted credential
 try {
     $credential = Import-Clixml -Path $credFile
 } catch {
@@ -123,12 +174,9 @@ try {
     exit 1
 }
 
-# Build Basic Auth header (password is decrypted in memory only, never displayed)
 $username = $credential.UserName
 $password = $credential.GetNetworkCredential().Password
 $base64Auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${username}:${password}"))
-
-# Clear the plain text password variable immediately
 Remove-Variable password
 
 $headers = @{
@@ -137,7 +185,6 @@ $headers = @{
     "Accept"        = "application/json"
 }
 
-# Return a hashtable with everything the caller needs
 return @{
     Headers       = $headers
     Credential    = $credential
