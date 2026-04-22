@@ -18,29 +18,7 @@ $r = & $api -InstanceDir $instanceDir -Command "check_connection"
 $r.result | ConvertTo-Json
 ```
 
-3. Check update set (MANDATORY before any writes):
-```powershell
-$r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
-    table = "sys_user_preference"
-    query = "user=javascript:gs.getUserID()^name=sys_update_set"
-    fields = "value"
-    limit = 1
-}
-$currentUsId = if ($r.result.records.Count -gt 0) { $r.result.records[0].value } else { "" }
-if ($currentUsId) {
-    $us = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
-        table = "sys_update_set"; query = "sys_id=$currentUsId"; fields = "name,is_default"; limit = 1
-    }
-    if ($us.result.records.Count -gt 0) {
-        $usName = $us.result.records[0].name; $isDef = $us.result.records[0].is_default
-        if ($isDef -eq "true") { Write-Host "WARNING: Current update set is DEFAULT ($usName) -- do NOT make changes!" }
-        else { Write-Host "OK: Current update set: $usName" }
-    }
-}
-```
-If DEFAULT detected: STOP and warn user.
-
-4. Query the record and save to temp file (NEVER pipe script fields to console):
+3. Query the record and save to temp file (NEVER pipe script fields to console):
 ```powershell
 $outFile = "$instanceDir\agent\tmp\sn_query_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
 $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
@@ -54,10 +32,10 @@ $json = $r.result.records | ConvertTo-Json -Depth 10
 Write-Host "Saved to: $outFile"
 ```
 
-5. Read back full content with `Get-Content -Raw` and display to user.
+4. Read back full content with `Get-Content -Raw` and display to user.
 
-6. If modifications are requested, update via Agent API:
+5. If modifications are requested, update via Agent API:
    - Single field: `update_record` with `table`, `sys_id`, `field`, `content`
    - Multiple fields (widgets): `update_record_batch` with `table`, `sys_id`, `fields` hashtable
 
-7. Verify: `& $api -InstanceDir $instanceDir -Command "get_last_error"`
+6. Verify: `& $api -InstanceDir $instanceDir -Command "get_last_error"`

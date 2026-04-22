@@ -16,15 +16,7 @@ $r = & $api -InstanceDir $instanceDir -Command "check_connection"
 $r.result | ConvertTo-Json
 ```
 
-2. Check update set (MANDATORY):
-```powershell
-$r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
-    table = "sys_update_set"; query = "state=in progress^is_default=true"; fields = "sys_id,name,is_default"; limit = 1
-}
-if ($r.result.records.Count -gt 0) { Write-Host "WARNING: DEFAULT update set! STOP." } else { Write-Host "OK" }
-```
-
-3. Check if the name already exists:
+2. Check if the name already exists:
 ```powershell
 $chk = & $api -InstanceDir $instanceDir -Command "check_name_exists_remote" -Params @{
     table = "<TABLE>"; name = "<NAME>"
@@ -32,7 +24,7 @@ $chk = & $api -InstanceDir $instanceDir -Command "check_name_exists_remote" -Par
 $chk.result | ConvertTo-Json
 ```
 
-4. Create the artifact (ALWAYS include `scope = "<YOUR_SCOPE>"`):
+3. Create the artifact (ALWAYS include `scope = "<YOUR_SCOPE>"`):
 
 **Script Include:**
 ```powershell
@@ -58,9 +50,9 @@ $r = & $api -InstanceDir $instanceDir -Command "create_artifact" -Params @{
 }
 ```
 
-5. Check for errors: `& $api -InstanceDir $instanceDir -Command "get_last_error"`
+4. Check for errors: `& $api -InstanceDir $instanceDir -Command "get_last_error"`
 
-6. Provide the sys_id from the response to the user.
+5. Provide the sys_id from the response to the user.
 
 ## Important
 - ALWAYS include `scope = "<YOUR_SCOPE>"` -- without it, records land in global scope

@@ -11,18 +11,17 @@ Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
 ## Create New Widget
 
 1. Verify connection: `& $api -InstanceDir $instanceDir -Command "check_connection"`
-2. Check update set (MANDATORY)
-3. Create widget with all 4 fields via `create_artifact`:
+2. Create widget with all 4 fields via `create_artifact`:
 ```powershell
 $r = & $api -InstanceDir $instanceDir -Command "create_artifact" -Params @{
     table = "sp_widget"; scope = "<YOUR_SCOPE>"
     fields = @{ name = "<Name>"; id = "<widget-id>"; script = "<server>"; client_script = "<client>"; template = "<html>"; css = "<scss>" }
 }
 ```
-4. Open preview: `& $api -InstanceDir $instanceDir -Command "open_in_browser" -Params @{ table = "sp_widget"; name = "<widget-id>" }`
-5. Make file changes in the scriptsync workspace
-6. Flush changes: `& $api -InstanceDir $instanceDir -Command "sync_now"`
-7. Refresh preview: `& $api -InstanceDir $instanceDir -Command "refresh_preview" -Params @{ table = "sp_widget"; name = "<widget-id>" }`
+3. Open preview: `& $api -InstanceDir $instanceDir -Command "open_in_browser" -Params @{ table = "sp_widget"; name = "<widget-id>" }`
+4. Make file changes in the scriptsync workspace
+5. Flush changes: `& $api -InstanceDir $instanceDir -Command "sync_now"`
+6. Refresh preview: `& $api -InstanceDir $instanceDir -Command "refresh_preview" -Params @{ table = "sp_widget"; name = "<widget-id>" }`
 
 ## Edit Existing Widget
 
