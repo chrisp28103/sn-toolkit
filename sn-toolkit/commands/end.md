@@ -32,4 +32,10 @@ description: End-of-session wrap-up -- update status trackers for next session c
    - Reference specific context files to read (e.g., "Read docs/context/mobile-app-status.md") rather than restating their contents -- let the new session load context from files, not from the prompt
    - Do NOT include background project info, architecture explanations, or anything already in CLAUDE.md or context files
    - Include the relevant `/sn-toolkit:start` invocation if SN work is expected
-   - Format as a fenced code block so the user can copy it directly
+   - **Format as a fenced code block so the user can copy it directly**
+   - **Density rules (critical -- user pastes this into plain-text notes):**
+     - NO blank lines anywhere inside the fence. Every line has content.
+     - NO sub-bullets or nested indentation -- flat single-level list.
+     - Commands inline with their trigger, not on separate lines (e.g. `When next batch previewed, run: /sn-toolkit:start then: powershell ...`)
+     - Markdown bolding (`**...**`) is fine for section leads but use sparingly -- only where a plain-text reader would benefit from the emphasis.
+     - One short sentence per bullet. If a bullet needs two sentences, split it into two bullets.
