@@ -4,7 +4,13 @@ A Claude Code plugin that turns any workspace into a ServiceNow scoped-app devel
 
 ## What's in the box
 
-- **16 slash commands** (`/sn-toolkit:start`, `/sn-toolkit:end`, `/sn-toolkit:widget`, `/sn-toolkit:pull`, `/sn-toolkit:creds`, etc.) covering the full SN dev loop: connect, query, create, edit, widget preview, session wrap-up, health monitoring.
+- **19 slash commands** covering the full SN dev loop:
+  - **Connect / inventory**: `start`, `end`, `creds`, `list`, `view-response`, `refresh`, `new-project`
+  - **Read**: `pull`, `export`, `review`, `audit`
+  - **Write**: `create` (schema-aware pre-flight), `update` (single-field + batch), `widget` (preview+refresh loop)
+  - **Session context**: `switch` (update set / app scope / domain), `start` (surfaces active context)
+  - **Visual debugging**: `inspect` (activate tab + `/tn` + screenshot), `attach` (upload files to any record)
+  - **Operations**: `monitor` (use with `/loop 5m`), `diagnose`
 - **2 subagents**: `sn-explorer` (deep instance exploration) and `sn-reviewer` (code-review against SN scripting standards).
 - **5 hooks**: SessionStart (auto-connect to SN), PreToolUse/PostToolUse (block BOM-writes, validate encoding on sn-scriptsync files), Stop (async error check), PostCompact (re-inject session scratchpad).
 - **2 bin scripts on PATH** while the plugin is enabled:

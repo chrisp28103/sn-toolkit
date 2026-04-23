@@ -8,11 +8,14 @@
     Full path to the scriptsync instance directory (the folder containing
     _settings.json, e.g. .../<your-instance-dir>)
 .PARAMETER Command
-    The Agent API command to execute (e.g. check_connection, query_records)
+    The Agent API command to execute (see .NOTES for the full command
+    catalog and canonical -Params shape for each).
 .PARAMETER Params
     Optional hashtable of parameters for the command.
 .PARAMETER TimeoutSeconds
-    Max seconds to wait for a response (default: 15)
+    Max seconds to wait for a response (default: 15). Remote commands
+    (create_artifact, screenshot, upload_attachment, switch_context) may
+    take 1-5s -- bump to 30+ for those.
 .EXAMPLE
     $r = & .agent\scripts\sn-agent-api.ps1 -InstanceDir "...\<your-instance-dir>" -Command "check_connection"
     $r.result.ready  # True if connected
@@ -24,6 +27,62 @@
         limit = 50
     }
     $r.result.records  # Array of matching records
+.NOTES
+    === COMMAND CATALOG (v1.5.0) ===
+
+    CONNECTION & STATUS (local, <100ms)
+      check_connection      -- no params. Call FIRST.
+      clear_last_error      -- no params.
+      get_last_error        -- no params. Check after mutations.
+      sync_now              -- no params. Flush pending file syncs.
+      get_sync_status       -- no params. Returns { pendingCount, isPaused, pendingFiles }.
+      get_instance_info     -- no params. Returns { instanceName, connected, hasSettings }.
+
+    QUERY & DISCOVERY (remote, 1-2s)
+      query_records         -- @{ table, query, fields, limit, orderBy }
+      check_name_exists     -- @{ table, name }              (local _map.json only)
+      check_name_exists_remote -- @{ table, name }           (SN API)
+      get_parent_options    -- @{ table, scope, nameField, limit }
+      get_table_metadata    -- @{ table }                    (caches to structure.json)
+      list_tables           -- no params
+      list_artifacts        -- @{ table }
+      get_file_structure    -- no params
+      validate_path         -- @{ path }
+
+    CREATE & UPDATE (remote, 1-3s)
+      create_artifact       -- @{ table, scope, fields = @{...} }
+      update_record         -- @{ table, sys_id, field, content }
+                               Note: "field" (singular) + "content", NOT "fields".
+      update_record_batch   -- @{ table, sys_id, fields = @{...} }
+
+    BROWSER / UI (remote, 1-3s)
+      open_in_browser       -- @{ table, sys_id } or @{ table, name, scope }
+                               Widgets open /$sp.do?id=sp-preview; others open form.
+      refresh_preview       -- @{ table, sys_id } or @{ table, name, scope }
+      activate_tab          -- @{ url, reload, waitForLoad, openIfNotFound, tabId }
+      take_screenshot       -- @{ url, fileName, tabId }
+                               Requires one-time extension-icon permission on target tab.
+      run_slash_command     -- @{ command, url, autoRun, tabId }
+                               Documented commands ONLY: /tn, /bg, /token, /sn, /xml.
+      upload_attachment     -- @{ table, sys_id, filePath }  (absolute path!)
+                               or @{ table, sys_id, fileName, imageData, contentType }
+
+    CONTEXT SWITCH (remote, 1-2s)
+      switch_context        -- @{ switchType, value, reloadTab, tabUrl }
+                               switchType = 'updateset' | 'application' | 'domain'
+                               value = sys_id of the target record
+                               reloadTab default $true (needed for new context to apply)
+
+    === COMMON GOTCHAS ===
+    * update_record wants "field" + "content" (singular). Passing "fields" errors out.
+    * Boolean / choice values in 'fields' must be STRINGS: "true", "-7", "100".
+    * upload_attachment "filePath" is relative to INSTANCE folder, not workspace.
+      Pass absolute paths to be safe.
+    * take_screenshot first use per session requires user action (click extension icon).
+    * run_slash_command: never invent commands. /click does not exist.
+    * switch_context: reloadTab must be true for new scope/domain filters to apply.
+    * Silent ACL failures: update_record can return success with zero persistence.
+      Always verify via re-query on sys_updated_on / sys_updated_by.
 #>
 param(
     [Parameter(Mandatory)][string]$InstanceDir,
