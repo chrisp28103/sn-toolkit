@@ -13,7 +13,7 @@ param(
     [Parameter(Mandatory)][string]$Scope,
     [Parameter(Mandatory)][string]$Instance,
     [string]$InstanceUrl = "",
-    [string]$OutputDir = "c:\Users\chris.perry_infocent\OneDrive\Documents\ServiceNow"
+    [string]$OutputDir = (Join-Path $env:USERPROFILE "Documents\ServiceNow")
 )
 
 $ErrorActionPreference = "Stop"

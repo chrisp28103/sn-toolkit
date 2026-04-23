@@ -9,20 +9,21 @@ paths:
 
 ## Background Script Testing (via Agent API)
 
-Use background scripts to validate changes without needing to click through the UI. All scripts run in the x_icir_zero_vector scope.
+Use background scripts to validate changes without needing to click through the UI. All scripts run in the current project's scope (see `.claude/project.json`).
+
+In the examples below, replace `<scope>` with your project's scope (e.g., `x_acme_widgets`) and `YourScriptInclude` / method names with the code under test.
 
 ### Test a Script Include Method
 ```javascript
-var utils = new x_icir_zero_vector.TpMobileUtils();
-var result = utils.getDailySchedule('<USER_SYS_ID>', '<DATE_STRING>');
-gs.info('[Test] getDailySchedule result: ' + JSON.stringify(result));
+var utils = new <scope>.YourScriptInclude();
+var result = utils.someMethod('<ARG_1>', '<ARG_2>');
+gs.info('[Test] someMethod result: ' + JSON.stringify(result));
 ```
 
 ### Test a Function Exists (Smoke Test)
 ```javascript
-var utils = new x_icir_zero_vector.TpMobileUtils();
-var methods = ['getDailySchedule', 'getJobDetail', 'clockIn', 'clockOut',
-               'getUserRoles', '_sendOnMyWaySMS', 'getTimecard'];
+var utils = new <scope>.YourScriptInclude();
+var methods = ['methodA', 'methodB', 'methodC']; // list your project's methods
 methods.forEach(function(m) {
     gs.info('[Test] ' + m + ': ' + (typeof utils[m] === 'function' ? 'EXISTS' : 'MISSING'));
 });
@@ -34,10 +35,10 @@ Create a test record that triggers the BR, then check syslog, then revert.
 ### Test Widget Server Logic (Dry Run)
 ```javascript
 var data = {};
-var input = { action: 'clockIn', stop_sys_id: '<STOP_SYS_ID>' };
-var utils = new x_icir_zero_vector.TpMobileUtils();
-var result = utils.clockIn(gs.getUserID(), input.stop_sys_id);
-data.clockResult = result;
+var input = { action: 'someAction', record_sys_id: '<SYS_ID>' };
+var utils = new <scope>.YourScriptInclude();
+var result = utils.someAction(gs.getUserID(), input.record_sys_id);
+data.result = result;
 gs.info('[Test] Widget dry run result: ' + JSON.stringify(data));
 ```
 

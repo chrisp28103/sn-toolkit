@@ -1,11 +1,8 @@
 ---
 paths:
-  - "zerovectordev/**/*.js"
-  - "zerovectordev/**/*.html"
-  - "zerovectordev/**/*.scss"
-  - "instances/**/*.js"
-  - "scripts/**/*.js"
-  - "docs/**/*.js"
+  - "**/*.js"
+  - "**/*.html"
+  - "**/*.scss"
 ---
 
 # ServiceNow Scripting Standards
@@ -32,7 +29,7 @@ const jobId = String(grStop.route?.job ?? '');
 
 ## Scoped Application API Restrictions
 
-In scoped applications (including Service Portal widgets in `x_icir_zero_vector`):
+In scoped applications (including Service Portal widgets in a scoped app):
 
 ```javascript
 // NOT allowed in scoped apps

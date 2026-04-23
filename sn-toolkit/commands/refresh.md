@@ -27,4 +27,4 @@ if (Test-Path $script) {
 4. After extraction, update `docs/architecture/overview.md` with any new tables or significant changes.
 
 ## Note
-If your project does not yet have `scripts\refresh-architecture.ps1`, the plugin does not prescribe its exact contents -- each project's scope and refresh needs differ. See the zero-vector reference workspace for a working example.
+If your project does not yet have `scripts\refresh-architecture.ps1`, the plugin does not prescribe its exact contents -- each project's scope and refresh needs differ. See any existing project's `scripts\refresh-architecture.ps1` for a working example, or write your own tailored to your scope's tables.
