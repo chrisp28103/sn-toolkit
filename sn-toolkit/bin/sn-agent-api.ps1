@@ -6,7 +6,7 @@
     response in agent/responses/. Returns the parsed response object.
 .PARAMETER InstanceDir
     Full path to the scriptsync instance directory (the folder containing
-    _settings.json, e.g. .../zerovectordev)
+    _settings.json, e.g. .../<your-instance-dir>)
 .PARAMETER Command
     The Agent API command to execute (e.g. check_connection, query_records)
 .PARAMETER Params
@@ -14,12 +14,12 @@
 .PARAMETER TimeoutSeconds
     Max seconds to wait for a response (default: 15)
 .EXAMPLE
-    $r = & .agent\scripts\sn-agent-api.ps1 -InstanceDir "...\zerovectordev" -Command "check_connection"
+    $r = & .agent\scripts\sn-agent-api.ps1 -InstanceDir "...\<your-instance-dir>" -Command "check_connection"
     $r.result.ready  # True if connected
 
-    $r = & .agent\scripts\sn-agent-api.ps1 -InstanceDir "...\zerovectordev" -Command "query_records" -Params @{
+    $r = & .agent\scripts\sn-agent-api.ps1 -InstanceDir "...\<your-instance-dir>" -Command "query_records" -Params @{
         table = "sys_script_include"
-        query = "sys_scope.scope=x_icir_zero_vector"
+        query = "sys_scope.scope=x_<your_scope>"
         fields = "sys_id,name,active"
         limit = 50
     }
