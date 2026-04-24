@@ -58,11 +58,27 @@ if ($Event -eq 'PreToolUse') {
         exit 0
     }
 
-    # Guard 2: Bash tool -- block BOM-producing commands
+    # Guard 2: Bash tool -- block BOM-producing commands.
+    # Strip heredocs and quoted strings before matching, so describing the bad
+    # pattern inside a commit message or echo does not false-positive.
     if ($toolName -eq 'Bash') {
         $cmd = $hookData.tool_input.command
-        if ($cmd -match 'Out-File\s.*-Encoding\s+utf8' -or
-            $cmd -match 'Set-Content\s.*-Encoding\s+(UTF8|utf8)') {
+        $stripped = $cmd
+        # PowerShell literal here-string: @'...'@
+        $stripped = [regex]::Replace($stripped, "(?s)@'.*?'@", '')
+        # PowerShell expandable here-string: @"..."@
+        $stripped = [regex]::Replace($stripped, '(?s)@".*?"@', '')
+        # Bash quoted heredoc: <<'EOF' ... EOF
+        $stripped = [regex]::Replace($stripped, "(?s)<<'(\w+)'.*?\r?\n\1\b", '')
+        # Bash unquoted heredoc: <<EOF ... EOF
+        $stripped = [regex]::Replace($stripped, "(?s)<<(\w+)\b.*?\r?\n\1\b", '')
+        # Single-quoted strings
+        $stripped = [regex]::Replace($stripped, "'[^']*'", '')
+        # Double-quoted strings
+        $stripped = [regex]::Replace($stripped, '"[^"]*"', '')
+
+        if ($stripped -match 'Out-File\s.*-Encoding\s+utf8' -or
+            $stripped -match 'Set-Content\s.*-Encoding\s+(UTF8|utf8)') {
             $msg = "BLOCKED: Out-File/Set-Content with -Encoding utf8 adds BOM bytes that corrupt SN files.`n" +
                    "Use instead: [System.IO.File]::WriteAllText(`$path, `$content, (New-Object System.Text.UTF8Encoding(`$false)))"
             [Console]::Error.WriteLine($msg)

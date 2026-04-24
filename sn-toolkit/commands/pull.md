@@ -21,21 +21,17 @@ $r = & $api -InstanceDir $instanceDir -Command "check_connection"
 $r.result | ConvertTo-Json
 ```
 
-3. Query the record and save to temp file (NEVER pipe script fields to console):
+3. Query the record, save, read back -- see conventions.md "Canonical Query-and-Save Snippet" for the full save+read pattern:
 ```powershell
-$outFile = "$instanceDir\agent\tmp\sn_query_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
 $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     table = "<TABLE>"
     query = "name=<NAME>^sys_scope.scope=<YOUR_SCOPE>"
     fields = "sys_id,name,script,active,sys_updated_on,sys_updated_by"
     limit = 1
 }
-$json = $r.result.records | ConvertTo-Json -Depth 10
-[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host "Saved to: $outFile"
 ```
 
-4. Read back full content with `Get-Content -Raw` and display to user.
+4. Display the full content to the user.
 
 5. If modifications are requested, update via Agent API:
    - Single field: `update_record` with `table`, `sys_id`, `field`, `content`

@@ -14,7 +14,7 @@ Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
 $r = & $api -InstanceDir $instanceDir -Command "check_connection"
 ```
 
-2. For each table type (sys_script_include, sys_script, sys_script_client, sp_widget, sys_ws_operation):
+2. For each table type (sys_script_include, sys_script, sys_script_client, sp_widget, sys_ws_operation) -- save per conventions.md "Canonical Query-and-Save Snippet":
 ```powershell
 $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     table = "<TABLE>"
@@ -22,10 +22,6 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     fields = "sys_id,name,script"
     limit = 500
 }
-$outFile = "$instanceDir\agent\tmp\export_<TABLE>_$(Get-Date -Format 'yyyyMMdd').json"
-$json = $r.result.records | ConvertTo-Json -Depth 10
-[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host "Exported $($r.result.records.Count) <TABLE> records"
 ```
 
 3. Report total counts per table type.

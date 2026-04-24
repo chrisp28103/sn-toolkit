@@ -68,26 +68,42 @@ Without this, Claude will prompt for approval every time it invokes the Agent AP
 
 ## Bootstrap a new SN workspace
 
+The point of the bootstrap is **wiring up the connection** between the VS Code sn-scriptsync extension and a ServiceNow instance through the SN Utils browser helper tab. Once that bridge exists, the Agent API rides on top of it and every slash command / hook / agent in this plugin resolves to the right instance automatically.
+
+Custom scope is optional -- supply it only when you're building on a scoped app. For OOB work, global-scope edits, platform exploration, or figuring out the instance before committing to a scope, skip it (it defaults to `global`).
+
 From inside any Claude Code session (with this plugin installed):
+
 ```
-/sn-toolkit:new-project <name> <scope> <instance>
+/sn-toolkit:new-project <name> <instance>                # exploratory / OOB / global
+/sn-toolkit:new-project <name> <instance> <scope>        # custom scoped app
 ```
 
-Example:
+Examples:
+
 ```
-/sn-toolkit:new-project aha x_icir_aha ahadev
+/sn-toolkit:new-project aha ahadev
+/sn-toolkit:new-project aha ahadev x_icir_aha
 ```
 
-Then open the newly-created workspace as your IDE root and run `/sn-toolkit:creds` to configure credentials.
+After the bootstrap finishes:
+
+1. Open the newly-created workspace as your IDE root.
+2. Run `/sn-toolkit:creds` to store the SN username/password (DPAPI-encrypted, gitignored).
+3. Click the **sn-scriptsync** item in the VS Code status bar and point it at `instances/<instance>/`.
+4. In the browser, open the target SN instance and type `/token` into the URL to activate the SN Utils helper tab -- this is the bridge the Agent API uses.
+5. Run `/sn-toolkit:start` to verify the round-trip (server running + browser connected).
+
+At that point you're live: every plugin command operates against that instance.
 
 ### Standalone bootstrap (no Claude session yet)
 
 First-time setup on a new machine, or if Claude isn't installed:
 ```powershell
-powershell.exe -File "%USERPROFILE%\.claude\plugins\cache\infocenter\sn-toolkit\<version>\bin\bootstrap-project.ps1" -Name "<name>" -Scope "<scope>" -Instance "<instance>"
+powershell.exe -File "%USERPROFILE%\.claude\plugins\cache\infocenter\sn-toolkit\<version>\bin\bootstrap-project.ps1" -Name "<name>" -Instance "<instance>"
 ```
 
-Check `~/.claude/plugins/installed_plugins.json` for the exact installed version.
+Check `~/.claude/plugins/installed_plugins.json` for the exact installed version. Append `-Scope "<x_foo_bar>"` only when you already know the custom scope.
 
 ## Project layout the plugin expects
 

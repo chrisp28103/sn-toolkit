@@ -5,13 +5,20 @@
 # scripts, autocomplete). This script only creates project-specific
 # scaffold -- dirs, CLAUDE.md, .gitignore, .claude/project.json.
 #
+# Primary value: stands up the VS Code sn-scriptsync <-> ServiceNow
+# instance connection (via the SN Utils browser helper tab) with the
+# right workspace layout. Scope is optional -- supply it when you are
+# building a custom scoped app; omit it for OOB / global / exploratory
+# work and it defaults to "global".
+#
 # Usage:
-#   bootstrap-project.ps1 -Name aha -Scope x_icir_aha -Instance ahadev
+#   bootstrap-project.ps1 -Name aha -Instance ahadev
+#   bootstrap-project.ps1 -Name aha -Instance ahadev -Scope x_icir_aha
 ###################################################################
 param(
     [Parameter(Mandatory)][string]$Name,
-    [Parameter(Mandatory)][string]$Scope,
     [Parameter(Mandatory)][string]$Instance,
+    [string]$Scope = "global",
     [string]$InstanceUrl = "",
     [string]$OutputDir = (Join-Path $env:USERPROFILE "Documents\ServiceNow")
 )

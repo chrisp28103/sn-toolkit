@@ -11,7 +11,7 @@ $ARGUMENTS should specify the table type to review (e.g., "sys_script_include" o
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
 
-1. Query all records of the specified type in scope:
+1. Query all records of the specified type in scope (save + read back per conventions.md "Canonical Query-and-Save Snippet"):
 ```powershell
 $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     table = "<TABLE>"
@@ -19,9 +19,6 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     fields = "sys_id,name,script"
     limit = 100
 }
-$outFile = "$instanceDir\agent\tmp\review_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
-$json = $r.result.records | ConvertTo-Json -Depth 10
-[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 ```
 
 2. Read each script and check against .claude/rules/sn-scripting.md standards:

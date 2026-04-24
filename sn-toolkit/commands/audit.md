@@ -11,7 +11,7 @@ $ARGUMENTS should contain the update set name or sys_id.
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
 
-1. Find the update set:
+1. Find the update set (save + read back per conventions.md "Canonical Query-and-Save Snippet"):
 ```powershell
 $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     table = "sys_update_set"
@@ -19,9 +19,6 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     fields = "sys_id,name,state,description"
     limit = 5
 }
-$outFile = "$instanceDir\agent\tmp\us_audit_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
-$json = $r.result.records | ConvertTo-Json -Depth 5
-[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 ```
 
 2. Query all update XML entries for that update set:
@@ -33,9 +30,6 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     fields = "sys_id,name,type,action,target_name"
     limit = 500
 }
-$outFile = "$instanceDir\agent\tmp\us_records_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
-$json = $r.result.records | ConvertTo-Json -Depth 5
-[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 ```
 
 3. Present a summary table grouped by type (Script Include, Business Rule, Widget, etc.) with action (INSERT/UPDATE).
