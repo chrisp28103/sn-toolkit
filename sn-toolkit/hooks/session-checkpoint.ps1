@@ -11,6 +11,19 @@ $instanceDir = Resolve-SnInstance -ProjectDir $projectDir
 if (-not $instanceDir) { exit 0 }
 
 if ($Event -eq 'Stop') {
+    # Gate: only run get_last_error if SN activity happened this turn. The agent/responses
+    # directory mtime reflects the last API round-trip; if it's stale, Claude did non-SN
+    # work (docs, code reads, conversation) and there is no async error to check.
+    $responsesDir = Join-Path $instanceDir.FullName 'agent\responses'
+    if (-not (Test-Path $responsesDir)) { exit 0 }
+
+    $newest = Get-ChildItem $responsesDir -File -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime -Descending |
+              Select-Object -First 1
+    if (-not $newest -or ((Get-Date) - $newest.LastWriteTime).TotalMinutes -gt 5) {
+        exit 0
+    }
+
     $api = Get-SnAgentApiPath
     try {
         $r = & $api -InstanceDir $instanceDir.FullName -Command 'get_last_error'

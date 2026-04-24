@@ -1,5 +1,8 @@
 ---
 description: Update a ServiceNow record directly via the Agent API -- one field or many, no file sync. Use for targeted single-field updates (work notes, state changes), multi-field batches (widget server+client+template+css), or any time you want to change a live record without going through the scriptsync file layer.
+model: sonnet
+effort: medium
+allowed-tools: [Read, Bash]
 ---
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".

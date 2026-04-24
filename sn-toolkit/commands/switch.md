@@ -1,5 +1,8 @@
 ---
 description: Switch ServiceNow session context -- update set, application scope, or DOMAIN. Use when the user needs to change update set, scope, or domain; when queries return 0 rows unexpectedly (often a domain visibility issue); or when the user says "switch to X update set" / "expand domain scope".
+model: sonnet
+effort: low
+allowed-tools: [Read, Bash]
 ---
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".

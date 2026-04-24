@@ -1,5 +1,8 @@
 ---
 description: End-of-session wrap-up -- update status trackers for next session continuity. Use when the user says "wrap up", "end session", "that's it for today", or is winding down SN work.
+model: sonnet
+effort: medium
+allowed-tools: [Read, Edit, Write, Bash]
 ---
 
 ## Steps

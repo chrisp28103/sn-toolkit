@@ -1,5 +1,8 @@
 ---
 description: Full Service Portal widget development loop -- create, preview, edit, sync. Use when the user asks to create, edit, or preview a Service Portal widget, or mentions sp_widget/portal widget work.
+model: sonnet
+effort: medium
+allowed-tools: [Read, Edit, Write, Bash]
 ---
 
 See `docs/reference/agent-api-cheatsheet.md` for command quick-reference.

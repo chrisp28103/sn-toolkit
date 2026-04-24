@@ -20,7 +20,8 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     limit = 5
 }
 $outFile = "$instanceDir\agent\tmp\us_audit_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
-$r.result.records | ConvertTo-Json -Depth 5 | Out-File -FilePath $outFile -Encoding utf8
+$json = $r.result.records | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 ```
 
 2. Query all update XML entries for that update set:
@@ -33,7 +34,8 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     limit = 500
 }
 $outFile = "$instanceDir\agent\tmp\us_records_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
-$r.result.records | ConvertTo-Json -Depth 5 | Out-File -FilePath $outFile -Encoding utf8
+$json = $r.result.records | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 ```
 
 3. Present a summary table grouped by type (Script Include, Business Rule, Widget, etc.) with action (INSERT/UPDATE).

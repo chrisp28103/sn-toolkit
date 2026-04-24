@@ -1,5 +1,8 @@
 ---
 description: Diagnose ServiceNow errors -- widgets not loading, script failures, BR issues, integration failures
+model: sonnet
+effort: medium
+allowed-tools: [Read, Grep, Bash]
 ---
 
 $ARGUMENTS should describe the error or symptom.
@@ -15,7 +18,8 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     limit = 20
 }
 $outFile = "$instanceDir\agent\tmp\syslog_diag.json"
-$r.result.records | ConvertTo-Json -Depth 5 | Out-File -FilePath $outFile -Encoding utf8
+$json = $r.result.records | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 ```
 Read the file and analyze errors.
 

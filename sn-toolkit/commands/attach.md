@@ -1,5 +1,8 @@
 ---
 description: Attach a local file (screenshot, document, PDF, log, etc.) to a ServiceNow record as an attachment. Use when the user says "attach this to INC...", "upload X as evidence to story Y", or wants to persist a file against a record.
+model: sonnet
+effort: low
+allowed-tools: [Read, Bash]
 ---
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".

@@ -1,5 +1,8 @@
 ---
 description: Pull a ServiceNow record's script/config, review it, and optionally modify it. Use when the user says "pull [record name]", "show me the script for X", or wants to inspect an existing SN record.
+model: sonnet
+effort: low
+allowed-tools: [Read, Bash]
 ---
 
 See `docs/reference/agent-api-cheatsheet.md` for command quick-reference.

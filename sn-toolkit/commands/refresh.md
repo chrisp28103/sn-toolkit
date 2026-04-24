@@ -1,5 +1,8 @@
 ---
 description: Refresh the project's reference architecture -- re-extract schema and scripts from the instance. Use when the user asks to refresh docs, re-extract schema, or update the architecture reference.
+model: sonnet
+effort: low
+allowed-tools: [Read, Bash]
 ---
 
 ## Steps

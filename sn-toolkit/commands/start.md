@@ -1,5 +1,8 @@
 ---
 description: Initialize a ServiceNow development session -- verify connection, clear errors, surface current session context (update set / scope / domain), load project context. Use at the start of any SN work session, when the user says "start", "kick off", or begins ServiceNow development.
+model: sonnet
+effort: low
+allowed-tools: [Read, Bash]
 ---
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".

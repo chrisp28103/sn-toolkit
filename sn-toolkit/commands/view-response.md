@@ -20,7 +20,8 @@ $r = & $api -InstanceDir $instanceDir -Command "query_records" -Params @{
     fields = "<FIELDS including script or long fields>"
     limit = 1
 }
-$r.result.records | ConvertTo-Json -Depth 10 | Out-File -FilePath $outFile -Encoding utf8
+$json = $r.result.records | ConvertTo-Json -Depth 10
+[System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 Write-Host "Saved to: $outFile"
 ```
 

@@ -1,9 +1,9 @@
 ---
 paths:
   - "**/now-ui.json"
-  - "**/src/**"
-  - "**/*component*"
-  - "**/*Component*"
+  - "**/src/**/view.js"
+  - "**/src/**/actionHandlers.js"
+  - "**/src/**/index.js"
 ---
 
 # ServiceNow Agent Workspace UI Components (Next Experience)

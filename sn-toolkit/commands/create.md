@@ -1,5 +1,8 @@
 ---
 description: Create a new ServiceNow record (Script Include, Business Rule, Client Script, Widget, etc.). Use when the user asks to create or add a new SN record of any type.
+model: sonnet
+effort: medium
+allowed-tools: [Read, Bash]
 ---
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
