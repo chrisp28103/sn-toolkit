@@ -52,7 +52,9 @@ Plugins cannot ship `permissions.allow` entries (Claude Code limitation: plugin-
       "Bash(powershell.exe:Select-String*)",
       "Bash(powershell.exe:Test-Path*)",
       "Bash(powershell.exe:Get-Item*)",
-      "Bash(powershell.exe:Start-Sleep*)"
+      "Bash(powershell.exe:Start-Sleep*)",
+      "Skill(sn-toolkit:*)",
+      "Skill(sn-toolkit:*:*)"
     ],
     "deny": [
       "Read(credentials/**)",
@@ -64,7 +66,7 @@ Plugins cannot ship `permissions.allow` entries (Claude Code limitation: plugin-
 }
 ```
 
-Without this, Claude will prompt for approval every time it invokes the Agent API.
+Without this, Claude will prompt for approval every time it invokes the Agent API or runs a plugin slash command (e.g. `/sn-toolkit:start`, `/sn-toolkit:end`).
 
 ## Bootstrap a new SN workspace
 
