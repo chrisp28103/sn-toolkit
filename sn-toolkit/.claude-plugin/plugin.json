@@ -1,7 +1,7 @@
 {
   "name": "sn-toolkit",
   "description": "ServiceNow scoped-app dev kit: Agent API wrapper, credential management, session hooks, slash commands, explorer + reviewer agents.",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "author": {
     "name": "Chris Perry"
   }
