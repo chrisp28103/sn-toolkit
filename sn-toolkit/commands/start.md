@@ -17,13 +17,38 @@ powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'check_c
 - If `browserConnected` is false: Tell user to open SN Utils helper tab (type /token in ServiceNow)
 - If both true: Proceed
 
-## Step 2: Clear error state
+## Step 2: Verify instance identity (CRITICAL)
+
+`get_instance_info` returns the cached `instanceName` from `_settings.json` -- it does NOT reflect what scriptsync's browser tab is actually connected to. If the helper tab is on a different instance than the configured InstanceDir, every subsequent query silently goes to the wrong place. Catch this BEFORE any other work.
+
+Query the live instance for its identity:
+
+```bash
+powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'query_records' -Params @{ table='sys_properties'; query='nameINinstance_name,instance_id'; fields='name,value'; limit=5 } | ConvertTo-Json -Depth 5"
+```
+
+Read the InstanceDir's expected identity:
+
+```bash
+powershell.exe -Command "Get-Content '$INSTANCE_DIR/_settings.json' | ConvertFrom-Json | Select-Object name, url, instance_id | ConvertTo-Json"
+```
+
+**Compare:**
+
+1. **Live `instance_name` vs. `_settings.json.name`** -- must match exactly. If different, STOP. Tell the user:
+   > scriptsync is connected to **`<live_name>`** but your InstanceDir is configured for **`<expected_name>`**. Either repoint scriptsync's helper tab to the expected instance, or pass a different `-InstanceDir` (check the project root for `.claude/project.json` -- it may list `devUrl`/`prodUrl` and a sibling `instances/<name>/` folder).
+2. **Live `instance_id` vs. `_settings.json.instance_id`** (defeats clone-name collisions) -- if `_settings.json` has no `instance_id` yet, treat this as a first-time verification and **append** the live `instance_id` to `_settings.json` so future starts can compare GUID-to-GUID. If the field exists and doesn't match: STOP, same warning as above (clone or accidental rename).
+3. Only proceed to Step 3 if both match.
+
+> **Why both checks:** ServiceNow clones occasionally inherit the source's `instance_name` until renamed. The `instance_id` GUID is unique per provisioning so it can't be spoofed. Name match catches the common case fast; ID match catches the edge case.
+
+## Step 3: Clear error state
 
 ```bash
 powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'clear_last_error' | ConvertTo-Json -Depth 5"
 ```
 
-## Step 3: Surface current session context
+## Step 4: Surface current session context
 
 ServiceNow has THREE concurrent context layers -- surfacing them at session start prevents "why is my query returning 0 rows?" confusion later.
 
@@ -42,15 +67,15 @@ If an update set sys_id is returned, look it up:
 powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'query_records' -Params @{ table='sys_update_set'; query='sys_id=<SYS_ID>'; fields='name,state,sys_scope.scope'; limit=1 } | ConvertTo-Json -Depth 5"
 ```
 
-## Step 4: Load project context
+## Step 5: Load project context
 
 Read `docs/context/mobile-app-status.md` (or the project's primary context file from the user's CLAUDE.md) to understand current project state and what was done last session.
 
-## Step 5: Report session status
+## Step 6: Report session status
 
 Summarize concisely (under 10 lines):
 - Connection: OK or FAILED (with specific fix instructions)
-- Active instance / scope / domain (from step 3)
+- Active instance / scope / domain (from step 4)
 - Active update set (name + state) -- flag WARNING if it's "Default" for global-scope work
 - Last session summary (from context file)
 - What is UP NEXT (from context file)
