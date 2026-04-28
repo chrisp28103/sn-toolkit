@@ -23,6 +23,9 @@ labels: bug
 
 - **sn-toolkit version:** <!-- from sn-toolkit/.claude-plugin/plugin.json -->
 - **Claude Code version:** <!-- claude --version -->
+- **VS Code version:** <!-- Help -> About -->
+- **sn-scriptsync extension version:** <!-- VS Code Extensions panel -->
+- **SN Utils browser extension version:** <!-- Chrome/Edge extensions page -->
 - **OS:** <!-- Windows 11 / macOS / Linux -->
 - **PowerShell version:** <!-- $PSVersionTable.PSVersion -->
 - **ServiceNow instance type:** <!-- PDI / dev / prod / domain-separated -->

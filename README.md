@@ -4,6 +4,17 @@ This repo is a Claude Code plugin marketplace. It publishes one plugin:
 
 - **[sn-toolkit](sn-toolkit/)** -- ServiceNow dev kit: 21 slash commands, 2 subagents, 5 hooks, 4 rules, Agent API wrapper, DPAPI credential storage. Full docs in [sn-toolkit/README.md](sn-toolkit/README.md).
 
+## Prerequisites
+
+The plugin is a layer over the **sn-scriptsync** + **SN Utils** stack -- without them, every slash command times out. You need:
+
+- **VS Code** (sn-scriptsync runs as a VS Code extension; no CLI mode exists)
+- **sn-scriptsync** VS Code extension (search VS Code Marketplace)
+- **SN Utils** browser extension for Chrome / Edge (search Chrome Web Store / Edge Add-ons)
+- **Windows** (DPAPI credential storage is Windows-only)
+
+Either install path below works to register the plugin, but VS Code must be running with sn-scriptsync active for the plugin to function.
+
 ## Install
 
 **Claude Code CLI / terminal:**

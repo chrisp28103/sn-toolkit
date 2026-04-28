@@ -20,11 +20,25 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
 - **4 rules** (markdown files with frontmatter `paths:` globs): `conventions.md`, `sn-scripting.md`, `sn-testing.md`, `sn-ui-components.md`. Reference these from your project CLAUDE.md.
 - **Autocomplete type defs** in `autocomplete/` for VS Code IntelliSense on ServiceNow APIs -- reference via `jsconfig.json`.
 
+## Prerequisites
+
+This plugin is a thin layer over the **sn-scriptsync** + **SN Utils** stack. Without them, every slash command will time out -- they are **not optional**.
+
+| Requirement | Notes |
+|-------------|-------|
+| **VS Code** | `sn-scriptsync` runs as a VS Code extension. There is no standalone / CLI mode. Pure-terminal Claude Code without VS Code running cannot drive this plugin. |
+| **`sn-scriptsync` VS Code extension** | Search "sn-scriptsync" in the VS Code Marketplace. Provides the local file-sync server and the Agent API request/response watcher under `instances/<instance>/agent/`. |
+| **SN Utils browser extension** | Chrome / Edge. Search "SN Utils" in the Chrome Web Store or Edge Add-ons. Exposes the helper tab in your SN instance; activate per-instance by typing `/token` in the SN URL. |
+| **Windows** | The DPAPI credential store (`sn-credentials.ps1`) is Windows-only. macOS / Linux are not currently supported. |
+| **Claude Code** | CLI or VS Code extension -- either works to *install* this plugin. At *runtime* you still need VS Code running so sn-scriptsync can serve the Agent API. |
+
+Install all four before proceeding.
+
 ## Install
 
 ### 1. Add the marketplace + install the plugin
 
-Pick whichever path matches how you run Claude Code.
+Pick whichever path matches how you run Claude Code. Either path just registers the plugin -- you still need the prerequisites above for it to function.
 
 **Option A -- Claude Code CLI / terminal**
 
