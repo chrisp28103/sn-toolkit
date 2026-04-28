@@ -1,7 +1,11 @@
-# SessionStart hook -- auto-connect to ServiceNow and inject session state into Claude's context.
-# Output goes to hookSpecificOutput.additionalContext so Claude sees the connection state
-# at the start of every session. The VS Code extension does not render this as a user-facing
-# banner -- it is consumed by Claude, who surfaces warnings in the first response if relevant.
+# SessionStart hook -- snapshot SN connection state at session start so Claude knows
+# whether scriptsync + helper tab are reachable. Output goes to
+# hookSpecificOutput.additionalContext.
+#
+# IMPORTANT: this is a snapshot at the exact moment Claude Code spawned. The helper-tab
+# websocket and agent watcher can be mid-handshake right then, so we retry once before
+# declaring failure. The message tells Claude to re-verify via `check_connection` before
+# deferring real work -- the snapshot is informational, not authoritative.
 #
 # No-ops silently in non-SN projects (no instances/ dir).
 
@@ -14,16 +18,46 @@ if (-not $instanceDir) { exit 0 }
 
 $api = Get-SnAgentApiPath
 
+function Get-SnConnectionSnapshot {
+    param(
+        [Parameter(Mandatory)][string]$ApiPath,
+        [Parameter(Mandatory)][string]$Dir,
+        [int]$TimeoutSec = 5
+    )
+    $r = & $ApiPath -InstanceDir $Dir -Command 'check_connection' -TimeoutSeconds $TimeoutSec 2>$null
+    if ($null -eq $r) { return @{ gotResponse = $false; srv = $null; brw = $null } }
+    return @{
+        gotResponse = $true
+        srv = [bool]$r.result.serverRunning
+        brw = [bool]$r.result.browserConnected
+    }
+}
+
 try {
-    $r = & $api -InstanceDir $instanceDir.FullName -Command 'check_connection'
-    $srv = $r.result.serverRunning
-    $brw = $r.result.browserConnected
+    $state = Get-SnConnectionSnapshot -ApiPath $api -Dir $instanceDir.FullName -TimeoutSec 5
 
-    & $api -InstanceDir $instanceDir.FullName -Command 'clear_last_error' | Out-Null
+    # Retry once if anything looks off -- handles transient race where the agent watcher
+    # or helper-tab websocket is still wiring up. Happy path (both true) skips the retry.
+    if (-not $state.gotResponse -or -not $state.srv -or -not $state.brw) {
+        Start-Sleep -Seconds 2
+        $state = Get-SnConnectionSnapshot -ApiPath $api -Dir $instanceDir.FullName -TimeoutSec 5
+    }
 
-    $msg = "SN Session ($($instanceDir.Name)): server=$srv, browser=$brw, errors cleared."
-    if (-not $srv) { $msg += ' WARNING: scriptsync server not running -- click sn-scriptsync in VS Code status bar.' }
-    if (-not $brw) { $msg += ' WARNING: browser not connected -- open SN Utils helper tab.' }
+    & $api -InstanceDir $instanceDir.FullName -Command 'clear_last_error' -TimeoutSeconds 5 2>$null | Out-Null
+
+    $reverify = "Before deferring SN work or telling the user the connection is down, re-verify yourself by running ``check_connection`` -- this hook is a snapshot, not the current state."
+
+    if (-not $state.gotResponse) {
+        $msg = "SN Session ($($instanceDir.Name)) startup snapshot: agent API did not respond within timeout. $reverify If still unreachable after re-verify: scriptsync may not be running (click sn-scriptsync in VS Code status bar) or helper tab not open (open SN Utils helper, type /token in ServiceNow)."
+    } else {
+        $statusLine = "server=$($state.srv), browser=$($state.brw)"
+        $msg = "SN Session ($($instanceDir.Name)) startup snapshot: $statusLine, errors cleared."
+        if (-not $state.srv -or -not $state.brw) {
+            $msg += " $reverify"
+            if (-not $state.srv) { $msg += " If still false after re-verify: scriptsync server not running -- ask user to click sn-scriptsync in VS Code status bar." }
+            if (-not $state.brw) { $msg += " If still false after re-verify: helper tab not connected -- ask user to open SN Utils helper tab (type /token in ServiceNow)." }
+        }
+    }
 
     @{
         hookSpecificOutput = @{
@@ -32,7 +66,7 @@ try {
         }
     } | ConvertTo-Json -Depth 3
 } catch {
-    $errMsg = "SN Session Init FAILED ($($instanceDir.Name)): $($_.Exception.Message). Run /sn-toolkit:creds or check VPN."
+    $errMsg = "SN Session Init hook errored ($($instanceDir.Name)): $($_.Exception.Message). Re-verify by running ``check_connection`` before reporting connection failure to the user -- the hook can fail in benign ways (agent watcher booting). If persistent: run /sn-toolkit:creds or check VPN."
     @{
         hookSpecificOutput = @{
             hookEventName = 'SessionStart'

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1] - 2026-04-28
+
+### Fixed
+- SessionStart hook reported false-negative `server=False, browser=False` when the agent watcher or helper-tab websocket was mid-handshake at the exact moment Claude Code spawned, leaving Claude convinced the SN connection was down for the rest of the session. The hook now retries once with a 2s gap before reporting failure, uses a 5s per-call timeout (down from 15s) to bound worst-case session start, and reframes the additionalContext message as a snapshot with an explicit instruction to Claude to re-verify via `check_connection` before deferring SN work.
+
 ## [1.12.0] - 2026-04-27
 
 ### Added
