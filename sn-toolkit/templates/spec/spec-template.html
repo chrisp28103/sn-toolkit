@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>{{TITLE}} -- {{PART_LABEL}}</title>
+    <link rel="stylesheet" href="../_template/spec-styles.css" />
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<header class="cover">
+    <span class="part-badge">{{PART_LABEL}}</span>
+    <h1 class="cover-title">{{TITLE}}</h1>
+    <div class="cover-subtitle">{{SUBTITLE}}</div>
+    <div class="cover-meta">Version {{VERSION}} | {{DATE}} | {{PROJECT}}</div>
+</header>
+
+<!-- ================= TABLE OF CONTENTS ================= -->
+<nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#s1">Section Title 1</a></li>
+        <li><a href="#s2">Section Title 2</a></li>
+        <!-- add rows as needed -->
+    </ol>
+</nav>
+
+<!-- ================= SECTION 1 ================= -->
+<section class="spec-section" id="s1">
+    <h1 class="section-title"><span class="section-num">1.</span> Section Title 1</h1>
+    <div class="functional-ref">Functional: Section X (Reference)</div>
+
+    <p>Intro paragraph.</p>
+
+    <!-- Example: role table -->
+    <table class="spec-table role-table">
+        <thead>
+            <tr><th>Role</th><th>What They Do</th></tr>
+        </thead>
+        <tbody>
+            <tr><th>Role A</th><td>Description.</td></tr>
+            <tr><th>Role B</th><td>Description.</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Example: lifecycle row -->
+    <div class="lifecycle">
+        <div class="step">Create</div>
+        <div class="arrow">&rarr;</div>
+        <div class="step">Submit</div>
+        <div class="arrow">&rarr;</div>
+        <div class="step">Approve</div>
+        <div class="arrow">&rarr;</div>
+        <div class="step">Deliver</div>
+    </div>
+    <div class="figure"><div class="caption">Figure 1 -- Lifecycle at a glance</div></div>
+
+    <!-- Example: numbered steps -->
+    <ol class="steps">
+        <li>
+            <span class="step-title">Do Something</span>
+            Description of what happens and why.
+        </li>
+        <li>
+            <span class="step-title">Do Another Thing</span>
+            Description.
+        </li>
+    </ol>
+
+    <!-- Example: why-this-matters callout -->
+    <div class="callout why">
+        <div class="callout-title">Why This Matters</div>
+        Explains the business rationale behind a design choice.
+    </div>
+</section>
+
+<!-- ================= SECTION 2 ================= -->
+<section class="spec-section page-break" id="s2">
+    <h1 class="section-title"><span class="section-num">2.</span> Section Title 2</h1>
+
+    <!-- Example: standard spec table -->
+    <table class="spec-table">
+        <thead>
+            <tr>
+                <th>Column A</th>
+                <th>Column B</th>
+                <th>Column C</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>example_field</code></td>
+                <td>Type</td>
+                <td>Description</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Example: note callout -->
+    <div class="callout note">
+        <div class="callout-title">Note</div>
+        A neutral, informational note.
+    </div>
+
+    <!-- Example: code block -->
+<pre>var demo = new Example();
+var result = demo.doSomething();</pre>
+
+</section>
+
+<footer class="doc-footer">
+    <span>{{TITLE}} -- {{PART_LABEL}}</span>
+    <span>{{DATE}}</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,471 @@
+/* sn-toolkit -- Spec Document Styles
+ * Shared print stylesheet for two-part specifications:
+ *   Part A -- Functional Guide (stakeholder-facing)
+ *   Part B -- Technical Specification (developer/admin)
+ * Tuned for US Letter via headless Chrome --print-to-pdf.
+ * Topic-agnostic; safe to use for SN or non-SN feature docs.
+ */
+
+@page {
+    size: letter;
+    margin: 0.75in 0.75in 0.9in 0.75in;
+}
+
+:root {
+    --spec-ink: #1c2733;
+    --spec-ink-soft: #3d4a5a;
+    --spec-muted: #6b7785;
+    --spec-rule: #d8dde4;
+    --spec-rule-strong: #b8c0ca;
+    --spec-surface: #ffffff;
+    --spec-surface-alt: #f6f8fa;
+    --spec-accent: #1f6b7a;
+    --spec-accent-soft: #e4f1f3;
+    --spec-callout: #fff8e1;
+    --spec-callout-rule: #e6c34a;
+    --spec-note: #eef4fb;
+    --spec-note-rule: #5b92c6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    color: var(--spec-ink);
+    background: var(--spec-surface);
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.42;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    counter-reset: page 1;
+}
+
+p {
+    margin: 0 0 0.55em 0;
+}
+
+strong {
+    color: var(--spec-ink);
+    font-weight: 600;
+}
+
+a {
+    color: var(--spec-accent);
+    text-decoration: none;
+}
+
+code, .mono {
+    font-family: "Consolas", "Menlo", "Courier New", monospace;
+    font-size: 0.92em;
+    background: var(--spec-surface-alt);
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--spec-ink);
+}
+
+pre {
+    font-family: "Consolas", "Menlo", "Courier New", monospace;
+    font-size: 9pt;
+    background: var(--spec-surface-alt);
+    border: 1px solid var(--spec-rule);
+    border-left: 3px solid var(--spec-accent);
+    padding: 10px 12px;
+    margin: 10px 0 14px 0;
+    overflow: hidden;
+    page-break-inside: avoid;
+    line-height: 1.35;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* -------- Cover -------- */
+.cover {
+    padding: 0.6in 0 0.3in 0;
+    border-bottom: 1px solid var(--spec-rule);
+    margin-bottom: 24px;
+    page-break-after: avoid;
+}
+
+.cover .part-badge {
+    display: inline-block;
+    font-size: 10.5pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #ffffff;
+    background: var(--spec-accent);
+    padding: 4px 12px;
+    border-radius: 3px;
+    margin-bottom: 18px;
+}
+
+.cover h1.cover-title {
+    font-size: 26pt;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    line-height: 1.15;
+    color: var(--spec-ink);
+}
+
+.cover .cover-subtitle {
+    font-size: 13pt;
+    color: var(--spec-ink-soft);
+    font-weight: 400;
+    margin: 0 0 22px 0;
+}
+
+.cover .cover-meta {
+    font-size: 10pt;
+    color: var(--spec-muted);
+}
+
+/* -------- Table of Contents -------- */
+.toc {
+    margin: 8px 0 28px 0;
+    page-break-after: always;
+}
+
+.toc h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    color: var(--spec-ink);
+    margin: 0 0 10px 0;
+    border-bottom: 2px solid var(--spec-accent);
+    padding-bottom: 4px;
+}
+
+.toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: toc-item;
+}
+
+.toc ol > li {
+    padding: 4px 0;
+    counter-increment: toc-item;
+    display: flex;
+    align-items: baseline;
+}
+
+.toc ol > li::before {
+    content: counter(toc-item) ".";
+    width: 2.2em;
+    color: var(--spec-accent);
+    font-weight: 600;
+    flex: none;
+}
+
+.toc ol > li a {
+    color: var(--spec-ink);
+    flex: 1;
+}
+
+/* -------- Sections -------- */
+section.spec-section {
+    page-break-inside: auto;
+    margin-top: 18px;
+}
+
+section.spec-section.page-break {
+    page-break-before: always;
+}
+
+h1.section-title {
+    font-size: 17pt;
+    font-weight: 700;
+    color: var(--spec-ink);
+    margin: 0 0 10px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--spec-rule);
+    page-break-after: avoid;
+}
+
+h1.section-title .section-num {
+    color: var(--spec-accent);
+    margin-right: 0.4em;
+}
+
+h2.sub-title {
+    font-size: 12.5pt;
+    font-weight: 700;
+    color: var(--spec-ink);
+    margin: 18px 0 8px 0;
+    page-break-after: avoid;
+}
+
+h3.sub-sub {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--spec-ink-soft);
+    margin: 14px 0 6px 0;
+    page-break-after: avoid;
+}
+
+.functional-ref {
+    font-size: 9.5pt;
+    color: var(--spec-muted);
+    font-style: italic;
+    margin: -4px 0 12px 0;
+}
+
+/* -------- Tables -------- */
+table.spec-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 10px 0 14px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+}
+
+table.spec-table thead th {
+    background: var(--spec-accent);
+    color: #ffffff;
+    text-align: left;
+    font-weight: 700;
+    padding: 7px 9px;
+    font-size: 8.8pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+table.spec-table tbody td {
+    padding: 6px 9px;
+    border-bottom: 1px solid var(--spec-rule);
+    vertical-align: top;
+}
+
+table.spec-table tbody tr:nth-child(even) td {
+    background: var(--spec-surface-alt);
+}
+
+table.spec-table td code {
+    font-size: 0.88em;
+}
+
+table.role-table tbody th {
+    text-align: left;
+    padding: 6px 9px;
+    border-bottom: 1px solid var(--spec-rule);
+    background: var(--spec-surface-alt);
+    font-weight: 600;
+    width: 22%;
+    vertical-align: top;
+}
+
+/* -------- Callouts -------- */
+.callout {
+    border: 1px solid var(--spec-rule);
+    border-left-width: 4px;
+    padding: 10px 12px;
+    margin: 12px 0;
+    border-radius: 3px;
+    page-break-inside: avoid;
+    font-size: 10pt;
+}
+
+.callout .callout-title {
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    font-size: 10pt;
+}
+
+.callout.why {
+    background: var(--spec-callout);
+    border-left-color: var(--spec-callout-rule);
+}
+
+.callout.note {
+    background: var(--spec-note);
+    border-left-color: var(--spec-note-rule);
+}
+
+.callout.accent {
+    background: var(--spec-accent-soft);
+    border-left-color: var(--spec-accent);
+}
+
+/* -------- Figures / Diagrams -------- */
+.figure {
+    margin: 14px 0 18px 0;
+    page-break-inside: avoid;
+    text-align: center;
+}
+
+.figure .figure-body {
+    border: 1px solid var(--spec-rule);
+    background: var(--spec-surface-alt);
+    padding: 14px;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.figure .figure-body svg,
+.figure .figure-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+.figure .caption {
+    font-size: 9.5pt;
+    color: var(--spec-muted);
+    font-style: italic;
+    margin-top: 6px;
+}
+
+/* -------- Flow / lifecycle blocks -------- */
+.lifecycle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0;
+    page-break-inside: avoid;
+}
+
+.lifecycle .step {
+    flex: 0 1 auto;
+    min-width: 1.1in;
+    padding: 8px 10px;
+    background: var(--spec-surface-alt);
+    border: 1px solid var(--spec-rule);
+    border-top: 3px solid var(--spec-accent);
+    text-align: center;
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: var(--spec-ink);
+    border-radius: 2px;
+}
+
+.lifecycle .arrow {
+    align-self: center;
+    color: var(--spec-accent);
+    font-weight: 700;
+}
+
+/* -------- Numbered how-it-works list -------- */
+.steps {
+    list-style: none;
+    counter-reset: step-counter;
+    padding: 0;
+    margin: 10px 0 14px 0;
+}
+
+.steps > li {
+    counter-increment: step-counter;
+    position: relative;
+    padding: 0 0 10px 2.4em;
+    min-height: 1.7em;
+}
+
+.steps > li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0.02em;
+    width: 1.8em;
+    height: 1.8em;
+    line-height: 1.8em;
+    text-align: center;
+    background: var(--spec-accent);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9em;
+    border-radius: 50%;
+}
+
+.steps > li .step-title {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+    color: var(--spec-ink);
+}
+
+/* -------- Definition list -------- */
+dl.spec-def {
+    margin: 6px 0 12px 0;
+}
+
+dl.spec-def dt {
+    font-weight: 700;
+    color: var(--spec-ink);
+    margin-top: 6px;
+}
+
+dl.spec-def dd {
+    margin: 2px 0 0 1.2em;
+    color: var(--spec-ink-soft);
+}
+
+/* -------- Quick-reference style -------- */
+.qref {
+    font-size: 9.5pt;
+}
+
+.qref table.spec-table td:first-child {
+    font-weight: 600;
+    width: 30%;
+}
+
+/* -------- Tag / pill -------- */
+.tag {
+    display: inline-block;
+    font-size: 8.5pt;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: var(--spec-accent-soft);
+    color: var(--spec-accent);
+    letter-spacing: 0.02em;
+}
+
+.tag.neutral {
+    background: var(--spec-surface-alt);
+    color: var(--spec-ink-soft);
+}
+
+/* -------- Footer (per-page via running element is not reliable in Chrome;
+ * we render a visible footer band at the tail of the page body instead) -------- */
+.doc-footer {
+    margin-top: 24px;
+    padding-top: 8px;
+    border-top: 1px solid var(--spec-rule);
+    font-size: 9pt;
+    color: var(--spec-muted);
+    display: flex;
+    justify-content: space-between;
+}
+
+/* -------- Print-specific overrides -------- */
+@media print {
+    body {
+        margin: 0;
+    }
+
+    a {
+        color: var(--spec-ink);
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    /* Discourage orphaned headings */
+    h1, h2, h3 {
+        page-break-after: avoid;
+    }
+
+    /* Keep tables and callouts together when possible */
+    table, .callout, .figure, .lifecycle {
+        page-break-inside: avoid;
+    }
+}
