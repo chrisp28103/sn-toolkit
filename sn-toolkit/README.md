@@ -1,6 +1,6 @@
 # sn-toolkit
 
-A Claude Code plugin that turns any workspace into a ServiceNow scoped-app development environment. Ships the Agent API wrapper, credential management, session hooks, slash commands, and subagents as shared infrastructure -- no per-project duplication.
+A Claude Code plugin that turns any workspace into a ServiceNow development environment. Ships the Agent API wrapper, credential management, session hooks, slash commands, and subagents as shared infrastructure -- no per-project duplication.
 
 ## What's in the box
 

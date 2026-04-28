@@ -1,6 +1,6 @@
 # Contributing to sn-toolkit
 
-Thanks for your interest! sn-toolkit is a Claude Code plugin for ServiceNow scoped-app development. Contributions are welcome -- bug reports, feature ideas, and pull requests.
+Thanks for your interest! sn-toolkit is a Claude Code plugin for ServiceNow development. Contributions are welcome -- bug reports, feature ideas, and pull requests.
 
 ## Reporting bugs
 
@@ -14,7 +14,7 @@ Open an issue using the **Bug report** template. Helpful details:
 
 ## Suggesting features
 
-Open an issue describing the use case. The toolkit is intentionally narrow -- it targets the SN scoped-app dev loop (Agent API + scriptsync + DPAPI creds). Features that broaden scope outside that loop will likely be declined.
+Open an issue describing the use case. The toolkit is intentionally narrow -- it targets the SN dev loop (Agent API + scriptsync + DPAPI creds). Features that broaden scope outside that loop will likely be declined.
 
 ## Pull requests
 

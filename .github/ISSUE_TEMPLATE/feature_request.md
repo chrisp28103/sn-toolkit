@@ -20,6 +20,6 @@ labels: enhancement
 ## Scope check
 
 <!--
-sn-toolkit targets the ServiceNow scoped-app dev loop (Agent API + scriptsync + DPAPI creds).
+sn-toolkit targets the ServiceNow dev loop (Agent API + scriptsync + DPAPI creds).
 How does this fit that scope?
 -->
