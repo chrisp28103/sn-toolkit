@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-04-28
+
+### Added
+- `/sn-toolkit:spec` -- topic-agnostic two-part specification document builder. Walks the user through producing a stakeholder-grade Part A (functional) + Part B (technical) HTML/PDF spec pair, modeled on the field-tested CSAT / Google Docs / Candidate Uniqueness deliverables. Optional `--with-sn-pulls` anchors Part B to live SN artifact state via Agent API extraction into `scratch/fresh-*`; non-SN topics skip cleanly.
+- `templates/spec/` -- `spec-template.html`, `spec-styles.css`, `render.ps1`, `README.md` shipped from the plugin and auto-copied into the project's `docs/specifications/_template/` on first run.
+
+### Changed
+- README command count 22 -> 23, new "Documentation" category surfaces the `spec` command.
+- Spec template CSS variables renamed `--zv-*` -> `--spec-*` for topic-agnostic positioning.
+- Cover-meta separator switched from `&bull;` to ASCII `|`; doc-footer separator switched from `&mdash;` to `--`.
+
 ## [1.12.1] - 2026-04-28
 
 ### Fixed
@@ -99,6 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.13.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.0
+[1.12.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.12.1
 [1.12.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.12.0
 [1.11.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.11.0
 [1.10.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.10.0
