@@ -6,14 +6,21 @@ This repo is a Claude Code plugin marketplace. It publishes one plugin:
 
 ## Install
 
-From inside any Claude Code session:
+**Claude Code CLI / terminal:**
 
 ```
 /plugin marketplace add https://github.com/chrisp28103/sn-toolkit.git
 /plugin install sn-toolkit@infocenter
 ```
 
-Then add the required permissions block to `~/.claude/settings.json` and you're ready to bootstrap an SN workspace. See [sn-toolkit/README.md](sn-toolkit/README.md) for the full install + permissions walkthrough and the complete command list.
+**Claude Code extension in VS Code (Manage Plugins UI):**
+
+1. Open the Claude Code panel -> Customize -> **Manage plugins**.
+2. **Marketplaces** tab -> **Add marketplace** -> paste `https://github.com/chrisp28103/sn-toolkit.git`.
+3. **Plugins** tab -> toggle **sn-toolkit@infocenter** on.
+4. Restart VS Code so the SessionStart hook fires.
+
+Either way, add the required permissions block to `~/.claude/settings.json` and you're ready to bootstrap an SN workspace. See [sn-toolkit/README.md](sn-toolkit/README.md) for the full install + permissions walkthrough and the complete command list.
 
 ## Repo layout
 
@@ -25,8 +32,16 @@ sn-toolkit/README.md              -- full plugin documentation
 
 ## Updates
 
+**CLI:**
 ```
 /plugin update sn-toolkit@infocenter
 ```
+
+**VS Code extension (Manage Plugins UI):** the UI has no in-place update yet, so the cleanest path is delete + reinstall:
+
+1. Manage plugins -> **Plugins** tab -> trash icon next to **sn-toolkit@infocenter**.
+2. Restart VS Code.
+3. Manage plugins -> **Plugins** tab -> toggle **sn-toolkit@infocenter** on (marketplace entry persists).
+4. Restart VS Code. New version is live.
 
 All workspaces using the plugin pick up the new version on the next session start.

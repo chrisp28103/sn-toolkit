@@ -24,6 +24,10 @@ A Claude Code plugin that turns any workspace into a ServiceNow scoped-app devel
 
 ### 1. Add the marketplace + install the plugin
 
+Pick whichever path matches how you run Claude Code.
+
+**Option A -- Claude Code CLI / terminal**
+
 ```
 /plugin marketplace add https://github.com/chrisp28103/sn-toolkit.git
 /plugin install sn-toolkit@infocenter
@@ -36,6 +40,17 @@ For local development (before publishing):
 ```
 
 Reload your Claude session so SessionStart hooks can fire.
+
+**Option B -- Claude Code extension in VS Code (Manage Plugins UI)**
+
+1. Open the Claude Code panel in VS Code.
+2. Click the **Customize** menu (gear / overflow icon at the top of the panel) and choose **Manage plugins**.
+3. In the **Manage Plugins** dialog, switch to the **Marketplaces** tab and click **Add marketplace**. Paste:
+   ```
+   https://github.com/chrisp28103/sn-toolkit.git
+   ```
+4. Switch to the **Plugins** tab, find **sn-toolkit@infocenter**, and toggle it **on**.
+5. Restart VS Code (or reload the window) so the SessionStart hook fires on the next Claude Code session.
 
 ### 2. Add required permissions to `~/.claude/settings.json`
 
@@ -128,10 +143,20 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-Pull new versions:
+**CLI path:**
 ```
 /plugin update sn-toolkit@infocenter
 ```
+
+**VS Code extension (Manage Plugins UI) path:**
+
+The UI doesn't expose an in-place update yet, so the most reliable workflow is delete + reinstall:
+
+1. Customize -> **Manage plugins** -> **Plugins** tab.
+2. Click the trash icon next to **sn-toolkit@infocenter** to uninstall.
+3. Restart VS Code.
+4. Open Manage Plugins again, find sn-toolkit in the **Plugins** tab, toggle it on (the marketplace entry persists, so you don't need to re-add it).
+5. Restart VS Code one more time. New version is live.
 
 All workspaces using the plugin pick up the update on next session start. No per-project sync required.
 
