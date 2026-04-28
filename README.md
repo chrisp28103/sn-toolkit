@@ -8,21 +8,21 @@ This repo is a Claude Code plugin marketplace. It publishes one plugin:
 
 The plugin is a layer over the **sn-scriptsync** + **SN Utils** stack -- without them, every slash command times out. You need:
 
-- **VS Code** (sn-scriptsync runs as a VS Code extension; no CLI mode exists)
-- **sn-scriptsync** VS Code extension (search VS Code Marketplace)
-- **SN Utils** browser extension for Chrome / Edge (search Chrome Web Store / Edge Add-ons)
-- **Windows** (DPAPI credential storage is Windows-only)
+- **An IDE that supports VS Code extensions** -- VS Code, Cursor, Windsurf, VSCodium, etc. The IDE just hosts `sn-scriptsync`; pure-terminal Claude Code (no IDE running) cannot drive this plugin.
+- **`sn-scriptsync` extension** -- the critical piece (search "sn-scriptsync" in the VS Code Marketplace or your IDE's equivalent). Creates the bridge between your local file system and the SN Utils browser extension.
+- **SN Utils** browser extension for Chrome / Edge (search Chrome Web Store / Edge Add-ons).
+- **Windows** -- DPAPI credential storage is Windows-only.
 
-Install the plugin via the VS Code extension's Manage Plugins UI -- see below.
+Install the plugin via the Claude Code extension's Manage Plugins UI -- see below.
 
 ## Install
 
-Install via the Claude Code extension in VS Code (Manage Plugins UI):
+Install via the Claude Code extension in your IDE (VS Code / Cursor / Windsurf / etc.):
 
 1. Open the Claude Code panel -> Customize -> **Manage plugins**.
 2. **Marketplaces** tab -> **Add marketplace** -> paste `https://github.com/chrisp28103/sn-toolkit.git`.
 3. **Plugins** tab -> toggle **sn-toolkit@infocenter** on.
-4. Restart VS Code so the SessionStart hook fires.
+4. Restart your IDE so the SessionStart hook fires.
 
 Then add the required permissions block to `~/.claude/settings.json` and you're ready to bootstrap an SN workspace. See [sn-toolkit/README.md](sn-toolkit/README.md) for the full install + permissions walkthrough and the complete command list.
 
@@ -39,8 +39,8 @@ sn-toolkit/README.md              -- full plugin documentation
 The Manage Plugins UI has no in-place update yet, so the cleanest path is delete + reinstall:
 
 1. Manage plugins -> **Plugins** tab -> trash icon next to **sn-toolkit@infocenter**.
-2. Restart VS Code.
+2. Restart your IDE.
 3. Manage plugins -> **Plugins** tab -> toggle **sn-toolkit@infocenter** on (marketplace entry persists).
-4. Restart VS Code. New version is live.
+4. Restart your IDE. New version is live.
 
 All workspaces using the plugin pick up the new version on the next session start.

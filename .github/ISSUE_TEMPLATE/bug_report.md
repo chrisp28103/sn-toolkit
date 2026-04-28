@@ -23,8 +23,8 @@ labels: bug
 
 - **sn-toolkit version:** <!-- from sn-toolkit/.claude-plugin/plugin.json -->
 - **Claude Code version:** <!-- claude --version -->
-- **VS Code version:** <!-- Help -> About -->
-- **sn-scriptsync extension version:** <!-- VS Code Extensions panel -->
+- **IDE + version:** <!-- VS Code / Cursor / Windsurf / etc., from Help -> About -->
+- **sn-scriptsync extension version:** <!-- IDE Extensions panel -->
 - **SN Utils browser extension version:** <!-- Chrome/Edge extensions page -->
 - **OS:** <!-- Windows 11 / macOS / Linux -->
 - **PowerShell version:** <!-- $PSVersionTable.PSVersion -->

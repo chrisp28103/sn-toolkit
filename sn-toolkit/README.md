@@ -26,28 +26,28 @@ This plugin is a thin layer over the **sn-scriptsync** + **SN Utils** stack. Wit
 
 | Requirement | Notes |
 |-------------|-------|
-| **VS Code** | `sn-scriptsync` runs as a VS Code extension. There is no standalone / CLI mode. Pure-terminal Claude Code without VS Code running cannot drive this plugin. |
-| **`sn-scriptsync` VS Code extension** | Search "sn-scriptsync" in the VS Code Marketplace. Provides the local file-sync server and the Agent API request/response watcher under `instances/<instance>/agent/`. |
+| **An IDE that supports VS Code extensions** | VS Code, Cursor, Windsurf, VSCodium, etc. The IDE itself is just the host -- what matters is that you can install the `sn-scriptsync` extension into it. Pure-terminal Claude Code (no IDE running) cannot drive this plugin. |
+| **`sn-scriptsync` extension** | The critical piece. Search "sn-scriptsync" in the VS Code Marketplace (or your IDE's equivalent). Creates the bridge between your local file system and the SN Utils browser extension, and serves the Agent API request/response loop under `instances/<instance>/agent/`. |
 | **SN Utils browser extension** | Chrome / Edge. Search "SN Utils" in the Chrome Web Store or Edge Add-ons. Exposes the helper tab in your SN instance; activate per-instance by typing `/token` in the SN URL. |
 | **Windows** | The DPAPI credential store (`sn-credentials.ps1`) is Windows-only. macOS / Linux are not currently supported. |
-| **Claude Code (VS Code extension)** | Install and run Claude Code via its VS Code extension. The Manage Plugins UI -- which is how you install this plugin -- is part of that extension. The CLI alone won't work since the plugin requires VS Code at runtime anyway. |
+| **Claude Code (extension in your IDE)** | Install Claude Code via your IDE's extension panel. The Manage Plugins UI (used to install this plugin) is part of that extension. |
 
-Install all four before proceeding.
+Install all of the above before proceeding.
 
 ## Install
 
-### 1. Add the marketplace + install the plugin (VS Code Manage Plugins UI)
+### 1. Add the marketplace + install the plugin (Manage Plugins UI)
 
-Install via the Claude Code extension in VS Code:
+Install via the Claude Code extension in your IDE (VS Code / Cursor / Windsurf / etc.):
 
-1. Open the Claude Code panel in VS Code.
+1. Open the Claude Code panel in your IDE.
 2. Click the **Customize** menu (gear / overflow icon at the top of the panel) and choose **Manage plugins**.
 3. In the **Manage Plugins** dialog, switch to the **Marketplaces** tab and click **Add marketplace**. Paste:
    ```
    https://github.com/chrisp28103/sn-toolkit.git
    ```
 4. Switch to the **Plugins** tab, find **sn-toolkit@infocenter**, and toggle it **on**.
-5. Restart VS Code (or reload the window) so the SessionStart hook fires on the next Claude Code session.
+5. Restart your IDE (or reload the window) so the SessionStart hook fires on the next Claude Code session.
 
 For local plugin development (before publishing), use a local path instead of the GitHub URL in step 3 (e.g. `<absolute-path-to-this-repo>`).
 
@@ -84,7 +84,7 @@ Without this, Claude will prompt for approval every time it invokes the Agent AP
 
 ## Bootstrap a new SN workspace
 
-The point of the bootstrap is **wiring up the connection** between the VS Code sn-scriptsync extension and a ServiceNow instance through the SN Utils browser helper tab. Once that bridge exists, the Agent API rides on top of it and every slash command / hook / agent in this plugin resolves to the right instance automatically.
+The point of the bootstrap is **wiring up the connection** between the `sn-scriptsync` extension (running in your IDE) and a ServiceNow instance through the SN Utils browser helper tab. Once that bridge exists, the Agent API rides on top of it and every slash command / hook / agent in this plugin resolves to the right instance automatically.
 
 Custom scope is optional -- supply it only when you're building on a scoped app. For OOB work, global-scope edits, platform exploration, or figuring out the instance before committing to a scope, skip it (it defaults to `global`).
 
@@ -106,7 +106,7 @@ After the bootstrap finishes:
 
 1. Open the newly-created workspace as your IDE root.
 2. Run `/sn-toolkit:creds` to store the SN username/password (DPAPI-encrypted, gitignored).
-3. Click the **sn-scriptsync** item in the VS Code status bar and point it at `instances/<instance>/`.
+3. Click the **sn-scriptsync** item in your IDE's status bar and point it at `instances/<instance>/`.
 4. In the browser, open the target SN instance and type `/token` into the URL to activate the SN Utils helper tab -- this is the bridge the Agent API uses.
 5. Run `/sn-toolkit:start` to verify the round-trip (server running + browser connected).
 
@@ -146,9 +146,9 @@ The Manage Plugins UI doesn't expose an in-place update yet, so the most reliabl
 
 1. Customize -> **Manage plugins** -> **Plugins** tab.
 2. Click the trash icon next to **sn-toolkit@infocenter** to uninstall.
-3. Restart VS Code.
+3. Restart your IDE.
 4. Open Manage Plugins again, find sn-toolkit in the **Plugins** tab, toggle it on (the marketplace entry persists, so you don't need to re-add it).
-5. Restart VS Code one more time. New version is live.
+5. Restart your IDE one more time. New version is live.
 
 All workspaces using the plugin pick up the update on next session start. No per-project sync required.
 
@@ -159,7 +159,7 @@ Push this directory to a git repo, then share:
 - The permissions block above (for `~/.claude/settings.json`)
 - The bootstrap invocation
 
-Teammates add the marketplace and install the plugin via VS Code's **Manage Plugins** UI (Customize -> Manage plugins -> Marketplaces tab), paste the permissions block once, and are ready to bootstrap their own SN workspaces.
+Teammates add the marketplace and install the plugin via the Claude Code extension's **Manage Plugins** UI in their IDE (Customize -> Manage plugins -> Marketplaces tab), paste the permissions block once, and are ready to bootstrap their own SN workspaces.
 
 ## Why a plugin instead of copying `.claude/` per project?
 
