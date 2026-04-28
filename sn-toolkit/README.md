@@ -30,32 +30,15 @@ This plugin is a thin layer over the **sn-scriptsync** + **SN Utils** stack. Wit
 | **`sn-scriptsync` VS Code extension** | Search "sn-scriptsync" in the VS Code Marketplace. Provides the local file-sync server and the Agent API request/response watcher under `instances/<instance>/agent/`. |
 | **SN Utils browser extension** | Chrome / Edge. Search "SN Utils" in the Chrome Web Store or Edge Add-ons. Exposes the helper tab in your SN instance; activate per-instance by typing `/token` in the SN URL. |
 | **Windows** | The DPAPI credential store (`sn-credentials.ps1`) is Windows-only. macOS / Linux are not currently supported. |
-| **Claude Code** | CLI or VS Code extension -- either works to *install* this plugin. At *runtime* you still need VS Code running so sn-scriptsync can serve the Agent API. |
+| **Claude Code (VS Code extension)** | Install and run Claude Code via its VS Code extension. The Manage Plugins UI -- which is how you install this plugin -- is part of that extension. The CLI alone won't work since the plugin requires VS Code at runtime anyway. |
 
 Install all four before proceeding.
 
 ## Install
 
-### 1. Add the marketplace + install the plugin
+### 1. Add the marketplace + install the plugin (VS Code Manage Plugins UI)
 
-Pick whichever path matches how you run Claude Code. Either path just registers the plugin -- you still need the prerequisites above for it to function.
-
-**Option A -- Claude Code CLI / terminal**
-
-```
-/plugin marketplace add https://github.com/chrisp28103/sn-toolkit.git
-/plugin install sn-toolkit@infocenter
-```
-
-For local development (before publishing):
-```
-/plugin marketplace add <absolute-path-to-this-repo>
-/plugin install sn-toolkit@infocenter
-```
-
-Reload your Claude session so SessionStart hooks can fire.
-
-**Option B -- Claude Code extension in VS Code (Manage Plugins UI)**
+Install via the Claude Code extension in VS Code:
 
 1. Open the Claude Code panel in VS Code.
 2. Click the **Customize** menu (gear / overflow icon at the top of the panel) and choose **Manage plugins**.
@@ -65,6 +48,8 @@ Reload your Claude session so SessionStart hooks can fire.
    ```
 4. Switch to the **Plugins** tab, find **sn-toolkit@infocenter**, and toggle it **on**.
 5. Restart VS Code (or reload the window) so the SessionStart hook fires on the next Claude Code session.
+
+For local plugin development (before publishing), use a local path instead of the GitHub URL in step 3 (e.g. `<absolute-path-to-this-repo>`).
 
 ### 2. Add required permissions to `~/.claude/settings.json`
 
@@ -157,14 +142,7 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-**CLI path:**
-```
-/plugin update sn-toolkit@infocenter
-```
-
-**VS Code extension (Manage Plugins UI) path:**
-
-The UI doesn't expose an in-place update yet, so the most reliable workflow is delete + reinstall:
+The Manage Plugins UI doesn't expose an in-place update yet, so the most reliable workflow is delete + reinstall:
 
 1. Customize -> **Manage plugins** -> **Plugins** tab.
 2. Click the trash icon next to **sn-toolkit@infocenter** to uninstall.
@@ -181,10 +159,10 @@ Push this directory to a git repo, then share:
 - The permissions block above (for `~/.claude/settings.json`)
 - The bootstrap invocation
 
-Teammates run `/plugin marketplace add ...`, `/plugin install sn-toolkit@infocenter`, paste the permissions block once, and are ready to bootstrap their own SN workspaces.
+Teammates add the marketplace and install the plugin via VS Code's **Manage Plugins** UI (Customize -> Manage plugins -> Marketplaces tab), paste the permissions block once, and are ready to bootstrap their own SN workspaces.
 
 ## Why a plugin instead of copying `.claude/` per project?
 
 Prior approach: a template directory (`sn-toolkit/`) was copy-duplicated into each new SN workspace via a bootstrap script. This produced per-project `.claude/` copies that drifted from the template whenever infrastructure changed, and teammates had no easy way to pick up updates.
 
-Plugin-based approach: the `.claude/` infrastructure (hooks, commands, agents, bin scripts) lives in exactly one place -- this repo -- and every workspace loads it dynamically. Updates propagate via `/plugin update`. Drift is structurally impossible.
+Plugin-based approach: the `.claude/` infrastructure (hooks, commands, agents, bin scripts) lives in exactly one place -- this repo -- and every workspace loads it dynamically. Updates propagate the next time anyone reinstalls the plugin via Manage Plugins. Drift is structurally impossible.
