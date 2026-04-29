@@ -19,7 +19,7 @@ For each item below, mark KNOWN (with value) or UNKNOWN. Infer from CLAUDE.md an
 
 1. **Table** (sys_class_name) -- e.g., `sp_widget`, `sys_script_include`, `sys_script`.
 2. **Record** -- sys_id or unique filter (name=X, number=Y). "New" is a valid value for create operations.
-3. **Scope** -- `x_icir_...` vs `global` vs other. Global-scope work often needs a non-Default update set.
+3. **Scope** -- a custom scoped app (e.g. `x_<vendor>_<app>`) vs `global` vs other. Global-scope work often needs a non-Default update set.
 4. **Update set** -- name of the active set, or "switch required". Never auto-switch; surface a mismatch and let the user decide.
 5. **Domain** -- visibility domain. `#1 cause of "query returned 0 rows"` surprises on domain-separated instances. Call out if unknown.
 6. **Operation** -- read-only, create, single-field update, multi-field batch.
