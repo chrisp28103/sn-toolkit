@@ -11,7 +11,10 @@ The plugin is a layer over the **sn-scriptsync** + **SN Utils** stack -- without
 - **An IDE that supports VS Code extensions** -- VS Code, Cursor, Windsurf, VSCodium, etc. The IDE just hosts `sn-scriptsync`; pure-terminal Claude Code (no IDE running) cannot drive this plugin.
 - **`sn-scriptsync` extension** -- the critical piece (search "sn-scriptsync" in the VS Code Marketplace or your IDE's equivalent). Creates the bridge between your local file system and the SN Utils browser extension.
 - **SN Utils** browser extension for Chrome / Edge (search Chrome Web Store / Edge Add-ons).
-- **Windows** -- DPAPI credential storage is Windows-only.
+
+Nice to have:
+
+- **Windows** -- only required for `/sn-toolkit:creds` and `/sn-toolkit:compare`, which use DPAPI-encrypted REST credentials. The core sn-scriptsync / Agent API flow runs through the browser bridge and works on any OS that can run PowerShell + the prerequisites above.
 
 Install the plugin via the Claude Code extension's Manage Plugins UI -- see below.
 

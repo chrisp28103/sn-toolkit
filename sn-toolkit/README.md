@@ -25,15 +25,22 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
 
 This plugin is a thin layer over the **sn-scriptsync** + **SN Utils** stack. Without them, every slash command will time out -- they are **not optional**.
 
+**Required:**
+
 | Requirement | Notes |
 |-------------|-------|
 | **An IDE that supports VS Code extensions** | VS Code, Cursor, Windsurf, VSCodium, etc. The IDE itself is just the host -- what matters is that you can install the `sn-scriptsync` extension into it. Pure-terminal Claude Code (no IDE running) cannot drive this plugin. |
 | **`sn-scriptsync` extension** | The critical piece. Search "sn-scriptsync" in the VS Code Marketplace (or your IDE's equivalent). Creates the bridge between your local file system and the SN Utils browser extension, and serves the Agent API request/response loop under `instances/<instance>/agent/`. |
 | **SN Utils browser extension** | Chrome / Edge. Search "SN Utils" in the Chrome Web Store or Edge Add-ons. Exposes the helper tab in your SN instance; activate per-instance by typing `/token` in the SN URL. |
-| **Windows** | The DPAPI credential store (`sn-credentials.ps1`) is Windows-only. macOS / Linux are not currently supported. |
 | **Claude Code (extension in your IDE)** | Install Claude Code via your IDE's extension panel. The Manage Plugins UI (used to install this plugin) is part of that extension. |
 
-Install all of the above before proceeding.
+**Nice to have:**
+
+| Capability | Notes |
+|------------|-------|
+| **Windows** | Only matters if you want `/sn-toolkit:creds` (encrypted username/password storage via DPAPI) and `/sn-toolkit:compare` (direct REST diff between two instances). Both call `sn-credentials.ps1`, which uses Windows DPAPI. The core development loop (sn-scriptsync + Agent API + every other slash command) authenticates through the SN Utils browser session and is OS-agnostic -- so on macOS / Linux you lose the REST-cred features but everything else works. |
+
+Install the required items before proceeding.
 
 ## Install
 
@@ -151,15 +158,6 @@ The Manage Plugins UI doesn't expose an in-place update yet, so the most reliabl
 5. Restart your IDE one more time. New version is live.
 
 All workspaces using the plugin pick up the update on next session start. No per-project sync required.
-
-## Teammate distribution
-
-Push this directory to a git repo, then share:
-- The marketplace URL: `https://github.com/chrisp28103/sn-toolkit.git`
-- The permissions block above (for `~/.claude/settings.json`)
-- The bootstrap invocation
-
-Teammates open the Manage Plugins UI from inside Claude Code (type `/plugin` in chat, or scroll to **Customize -> Manage plugins** in the Claude Code panel), add the marketplace under the **Marketplaces** tab, toggle the plugin on under the **Plugins** tab, paste the permissions block once, and are ready to bootstrap their own SN workspaces.
 
 ## Why a plugin instead of copying `.claude/` per project?
 
