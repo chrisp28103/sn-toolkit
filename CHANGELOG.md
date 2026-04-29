@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1] - 2026-04-29
+
+### Changed
+- `/sn-toolkit:start` no longer redundantly verifies the SN connection when the SessionStart hook has already done it. Step 1 (`check_connection`) and Step 3 (`clear_last_error`) now skip when the SessionStart additionalContext snapshot in conversation already shows `server=True, browser=True, errors cleared`; the skill only runs them when the snapshot is missing, stale (post-compaction), or shows either flag false.
+- `/sn-toolkit:start` Step 4 dropped the redundant `get_instance_info` call. Step 2 already establishes instance identity from `_settings.json` + `sys_properties`, so Step 4 now only queries the active update-set preference -- the unique value it actually contributes.
+- README and manifest descriptions corrected from "23 slash commands" to "24" (root README was even further behind at 21). The actual file count was already 24 at v1.13.0; this resyncs the user-facing description text.
+
 ## [1.13.0] - 2026-04-28
 
 ### Added
@@ -110,6 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.13.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.1
 [1.13.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.0
 [1.12.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.12.1
 [1.12.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.12.0

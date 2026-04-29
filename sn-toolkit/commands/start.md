@@ -9,6 +9,8 @@ Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
 
 ## Step 1: Verify connection
 
+**Skip Steps 1 and 3 if the SessionStart snapshot in your context already shows `server=True, browser=True, errors cleared`** -- the hook ran `check_connection` and `clear_last_error` for you. Jump to Step 2. Only run the commands below if the snapshot is missing, stale (e.g. after compaction), or shows either flag false.
+
 ```bash
 powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'check_connection' | ConvertTo-Json -Depth 5"
 ```
@@ -50,13 +52,9 @@ powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'clear_l
 
 ## Step 4: Surface current session context
 
-ServiceNow has THREE concurrent context layers -- surfacing them at session start prevents "why is my query returning 0 rows?" confusion later.
+ServiceNow has THREE concurrent context layers -- surfacing them at session start prevents "why is my query returning 0 rows?" confusion later. Step 2 already pulled the instance identity (name, scope, instance_id) from `_settings.json` and `sys_properties`, so the only missing piece is the active update set.
 
-```bash
-powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'get_instance_info' | ConvertTo-Json -Depth 5"
-```
-
-Also query the currently-active update set via the session's preference (if the `get_instance_info` result doesn't include it):
+Query the currently-active update set via the session's preference:
 
 ```bash
 powershell.exe -Command "& '$API' -InstanceDir '$INSTANCE_DIR' -Command 'query_records' -Params @{ table='sys_user_preference'; query='user=javascript:gs.getUserID()^name=sys_update_set'; fields='value'; limit=1 } | ConvertTo-Json -Depth 5"

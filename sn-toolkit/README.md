@@ -4,7 +4,7 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
 
 ## What's in the box
 
-- **23 slash commands** covering the full SN dev loop:
+- **24 slash commands** covering the full SN dev loop:
   - **Connect / inventory**: `start`, `end`, `creds`, `list`, `view-response`, `refresh`, `new-project`
   - **Read**: `pull`, `export`, `review`, `audit`
   - **Write**: `create` (schema-aware pre-flight), `update` (single-field + batch), `widget` (preview+refresh loop), `sync-push` (flush + drain + error-check)

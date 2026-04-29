@@ -1,7 +1,7 @@
 {
   "name": "sn-toolkit",
-  "description": "ServiceNow dev kit for Claude Code: Agent API wrapper, DPAPI credential management, session hooks, 23 slash commands, explorer + reviewer agents.",
-  "version": "1.13.0",
+  "description": "ServiceNow dev kit for Claude Code: Agent API wrapper, DPAPI credential management, session hooks, 24 slash commands, explorer + reviewer agents.",
+  "version": "1.13.1",
   "author": {
     "name": "Chris Perry"
   }
