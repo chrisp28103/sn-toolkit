@@ -19,8 +19,8 @@ Install the plugin via the Claude Code extension's Manage Plugins UI -- see belo
 
 Install via the Claude Code extension in your IDE (VS Code / Cursor / Windsurf / etc.):
 
-1. Open the Claude Code panel -> Customize -> **Manage plugins**.
-2. **Marketplaces** tab -> **Add marketplace** -> paste `https://github.com/chrisp28103/sn-toolkit.git`.
+1. In the Claude Code chat, type `/plugin` and pick **Manage plugins** from the menu. (Equivalent to clicking **Manage plugins** under the **Customize** section of the Claude Code panel.)
+2. In the dialog: **Marketplaces** tab -> paste `https://github.com/chrisp28103/sn-toolkit.git` into the input -> click **Add**.
 3. **Plugins** tab -> toggle **sn-toolkit@infocenter** on.
 4. Restart your IDE so the SessionStart hook fires.
 
@@ -38,9 +38,9 @@ sn-toolkit/README.md              -- full plugin documentation
 
 The Manage Plugins UI has no in-place update yet, so the cleanest path is delete + reinstall:
 
-1. Manage plugins -> **Plugins** tab -> trash icon next to **sn-toolkit@infocenter**.
+1. `/plugin` -> **Manage plugins** -> **Plugins** tab -> trash icon next to **sn-toolkit@infocenter**.
 2. Restart your IDE.
-3. Manage plugins -> **Plugins** tab -> toggle **sn-toolkit@infocenter** on (marketplace entry persists).
+3. `/plugin` -> **Manage plugins** -> **Plugins** tab -> toggle **sn-toolkit@infocenter** on (marketplace entry persists).
 4. Restart your IDE. New version is live.
 
 All workspaces using the plugin pick up the new version on the next session start.

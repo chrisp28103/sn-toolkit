@@ -41,16 +41,15 @@ Install all of the above before proceeding.
 
 Install via the Claude Code extension in your IDE (VS Code / Cursor / Windsurf / etc.):
 
-1. Open the Claude Code panel in your IDE.
-2. Click the **Customize** menu (gear / overflow icon at the top of the panel) and choose **Manage plugins**.
-3. In the **Manage Plugins** dialog, switch to the **Marketplaces** tab and click **Add marketplace**. Paste:
+1. **Open the Manage Plugins dialog.** Easiest path: in the Claude Code chat input, type `/plugin` and select **Manage plugins** from the autocomplete menu. (Alternative: open the Claude Code panel in your IDE, scroll the panel to the **Customize** section, and click **Manage plugins** there.)
+2. **Add the marketplace.** In the dialog, switch to the **Marketplaces** tab. Paste the URL into the `GitHub repo, URL, or path...` input and click **Add**:
    ```
    https://github.com/chrisp28103/sn-toolkit.git
    ```
-4. Switch to the **Plugins** tab, find **sn-toolkit@infocenter**, and toggle it **on**.
-5. Restart your IDE (or reload the window) so the SessionStart hook fires on the next Claude Code session.
+3. **Enable the plugin.** Switch to the **Plugins** tab, find **sn-toolkit@infocenter** in the INSTALLED list, and toggle it **on**.
+4. **Restart your IDE** (or reload the window) so the SessionStart hook fires on the next Claude Code session.
 
-For local plugin development (before publishing), use a local path instead of the GitHub URL in step 3 (e.g. `<absolute-path-to-this-repo>`).
+For local plugin development (before publishing), paste an absolute path to this repo into the marketplace input instead of the GitHub URL.
 
 ### 2. Add required permissions to `~/.claude/settings.json`
 
@@ -145,10 +144,10 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 The Manage Plugins UI doesn't expose an in-place update yet, so the most reliable workflow is delete + reinstall:
 
-1. Customize -> **Manage plugins** -> **Plugins** tab.
+1. Type `/plugin` in chat -> **Manage plugins** -> **Plugins** tab.
 2. Click the trash icon next to **sn-toolkit@infocenter** to uninstall.
 3. Restart your IDE.
-4. Open Manage Plugins again, find sn-toolkit in the **Plugins** tab, toggle it on (the marketplace entry persists, so you don't need to re-add it).
+4. Open Manage Plugins again (`/plugin`), find sn-toolkit in the **Plugins** tab, toggle it on. The marketplace entry persists, so you don't need to re-add it.
 5. Restart your IDE one more time. New version is live.
 
 All workspaces using the plugin pick up the update on next session start. No per-project sync required.
@@ -160,7 +159,7 @@ Push this directory to a git repo, then share:
 - The permissions block above (for `~/.claude/settings.json`)
 - The bootstrap invocation
 
-Teammates add the marketplace and install the plugin via the Claude Code extension's **Manage Plugins** UI in their IDE (Customize -> Manage plugins -> Marketplaces tab), paste the permissions block once, and are ready to bootstrap their own SN workspaces.
+Teammates open the Manage Plugins UI from inside Claude Code (type `/plugin` in chat, or scroll to **Customize -> Manage plugins** in the Claude Code panel), add the marketplace under the **Marketplaces** tab, toggle the plugin on under the **Plugins** tab, paste the permissions block once, and are ready to bootstrap their own SN workspaces.
 
 ## Why a plugin instead of copying `.claude/` per project?
 
