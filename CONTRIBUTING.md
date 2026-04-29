@@ -31,7 +31,7 @@ Open an issue describing the use case. The toolkit is intentionally narrow -- it
 
 - **PowerShell scripts** (`bin/*.ps1`): Windows PowerShell 5.1 compatible. No `&&` / `||` / ternary / null-coalescing operators.
 - **ASCII-only** in any file that gets pushed to a ServiceNow instance (commands, agents, rules). The plugin enforces this in its own hooks for downstream projects -- contributions to the plugin itself should follow the same rule for consistency.
-- **No client/instance-specific values.** Use generic placeholders like `x_<vendor>_<app>` (or `<scope>`) and `<instance>` in all examples -- not real scope prefixes or instance hostnames.
+- **No client/instance-specific values.** Use generic placeholders like `<scope>` and `<instance>` in all examples -- not real scope prefixes or instance hostnames.
 
 ## License
 
