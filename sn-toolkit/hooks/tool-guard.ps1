@@ -27,6 +27,49 @@ function Test-PathInSyncRoot {
 if ($Event -eq 'PreToolUse') {
     $toolName = $hookData.tool_name
 
+    # Guard 0 (runs FIRST for Edit/Write): scriptsync target-pivot detection.
+    # When the user flips sn-scriptsync's helper tab to a different instance mid-session,
+    # editing a local file under <pathInstance>/ can cross-write to <liveInstance>.
+    # This block probes the live instance and BLOCKS on mismatch. Cached for 30s to avoid
+    # probing every keystroke edit. SessionStart wipes the cache so each session probes fresh.
+    if ($toolName -eq 'Edit' -or $toolName -eq 'Write') {
+        $filePath = $hookData.tool_input.file_path
+        $pathInstance = Get-PathImpliedInstance -FilePath $filePath -ProjectDir $projectDir
+        if ($pathInstance) {
+            $live = Get-CachedLiveInstance -ProjectDir $projectDir -TtlSeconds 30
+            if (-not $live) {
+                $probeDir = Join-Path (Join-Path $projectDir 'instances') $pathInstance
+                $probe = Invoke-LiveInstanceProbe -InstanceDir $probeDir -TimeoutSec 4
+                if (-not $probe.ok) {
+                    $msg = "BLOCKED: cannot verify scriptsync helper-tab instance (probe failed).`n" +
+                           "About to edit a file under '$pathInstance/' but cannot confirm the helper tab is on '$pathInstance'.`n" +
+                           "Risk: silent cross-instance write if scriptsync's helper tab has been flipped to a different target.`n" +
+                           "Fix:`n" +
+                           "  (a) run check_connection to diagnose helper-tab connectivity, then retry`n" +
+                           "  (b) use Agent API directly with explicit -InstanceDir for the correct target"
+                    [Console]::Error.WriteLine($msg)
+                    exit 2
+                }
+                $live = $probe.live
+                if ($live -eq $pathInstance) {
+                    Set-CachedLiveInstance -ProjectDir $projectDir -LiveInstance $live
+                }
+            }
+            if ($live -ne $pathInstance) {
+                $msg = "BLOCKED: scriptsync helper tab is on '$live', but the edit target is '$pathInstance'.`n" +
+                       "Risk of cross-instance write -- editing a file under '$pathInstance/' while scriptsync syncs to '$live'.`n" +
+                       "Fix:`n" +
+                       "  (a) flip scriptsync's helper tab back to '$pathInstance' (open SN Utils helper on $pathInstance.service-now.com), then retry`n" +
+                       "  (b) use Agent API directly with -InstanceDir for the intended target`n" +
+                       "  (c) if intentional cross-instance work, edit the file under instances/$live/ instead of $pathInstance/"
+                [Console]::Error.WriteLine($msg)
+                exit 2
+            }
+        }
+        # Edit has no further PreToolUse guards; Write falls through to Guard 1.
+        if ($toolName -eq 'Edit') { exit 0 }
+    }
+
     # Guard 1: Write tool -- protect the sync directory
     if ($toolName -eq 'Write') {
         $filePath = $hookData.tool_input.file_path

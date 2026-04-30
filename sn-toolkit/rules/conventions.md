@@ -65,6 +65,16 @@ Implication: when planning a write to one of these tables, query the **target re
 
 When creating a new record on one of these tables via `create_artifact`, pass `scope = '<target_app_scope>'` explicitly. The `create_artifact` command sets `sys_scope` on the new record from that parameter.
 
+## Scriptsync target-pivot guard (PreToolUse)
+
+The PreToolUse hook BLOCKS Edit/Write of any file inside a sn-scriptsync sync workspace (`<projectDir>/<instanceName>/...`) when the live SN helper-tab instance differs from the path-implied instance. This catches the case where the user flips scriptsync's helper tab to a different instance mid-session (e.g. dev->prod for UAT) and a subsequent local file edit would push to the wrong target.
+
+Result is cached at `<projectDir>/.claude/.sn-instance-lock.json` for 30s, so a burst of edits in the same workspace pays the probe cost once. SessionStart wipes the cache so each session probes fresh.
+
+If the hook blocks an edit:
+- Mismatch case: flip scriptsync back to the path-implied instance via the SN Utils helper tab, then retry; OR work via Agent API directly with explicit `-InstanceDir` for the intended target.
+- Probe-failure case (helper tab unreachable): run `check_connection` to diagnose, then retry. There is no soft-warn fallback -- if we can't verify the target, we don't have the safety guarantee.
+
 ## No silent REST fallback when Agent API fails
 
 When a `create_artifact` / `update_record` call returns `status=success` but the change doesn't actually land (read-back shows record unchanged, or no `sys_update_xml` row appears), STOP. Do not pivot to direct `Invoke-RestMethod -Method Patch/Post/Delete` to "make it work."

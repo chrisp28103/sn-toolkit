@@ -45,6 +45,10 @@ try {
 
     & $api -InstanceDir $instanceDir.FullName -Command 'clear_last_error' -TimeoutSeconds 5 2>$null | Out-Null
 
+    # Wipe the instance-pivot cache so this session probes fresh on its first Edit/Write.
+    # Stale cache from a prior session could mask a helper-tab pivot done while idle.
+    Clear-CachedLiveInstance -ProjectDir $projectDir
+
     $reverify = "Before deferring SN work or telling the user the connection is down, re-verify yourself by running ``check_connection`` -- this hook is a snapshot, not the current state."
 
     if (-not $state.gotResponse) {

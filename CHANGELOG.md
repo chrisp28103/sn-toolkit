@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-04-30
+
+### Added
+- Scriptsync target-pivot guard in `hooks/tool-guard.ps1`: `PreToolUse` now blocks `Edit` and `Write` on sync-workspace files when the live SN helper-tab instance does not match the path-implied instance. Prevents cross-instance writes when the user flips scriptsync's browser tab mid-session (e.g. dev -> prod for UAT). Probe result is cached for 30s so edit bursts pay the cost once; the hook hard-blocks on probe failure rather than soft-warning.
+- New helpers in `hooks/_common.ps1`: `Get-PathImpliedInstance` (derives instance name from file path), `Get-CachedLiveInstance` / `Set-CachedLiveInstance` / `Clear-CachedLiveInstance` (30s TTL cache), `Invoke-LiveInstanceProbe` (queries `sys_properties.instance_name` live via the Agent API).
+- `hooks/session-start.ps1` now wipes the pivot cache at every session start so each new Claude Code session probes fresh rather than inheriting a stale reading.
+- `rules/conventions.md` documents the guard behavior, the hard-block-on-probe-failure decision, and bypass paths (flip scriptsync back, or use Agent API with explicit `-InstanceDir`).
+
+### Changed
+- `hooks/hooks.json` PreToolUse matcher extended from `Bash|Write` to `Bash|Write|Edit`; hook timeout raised 5s -> 8s to accommodate the live probe (4s) plus overhead.
+
 ## [1.13.1] - 2026-04-29
 
 ### Changed
@@ -117,6 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.14.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.14.0
 [1.13.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.1
 [1.13.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.0
 [1.12.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.12.1
