@@ -163,23 +163,33 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-There's no `/plugin update` slash command in Claude Code, but you don't need one. Two clean paths:
+Three paths, all converging on the same outcome. Pick whichever fits your workflow.
 
-### Recommended -- enable auto-update on the marketplace (one-time)
+### 1. Auto-update on the marketplace (recommended, one-time)
 
-Third-party marketplaces (like `infocenter`) have auto-update **disabled by default** -- official Anthropic marketplaces have it on by default, but ours doesn't until you turn it on. Do this once per machine:
+Third-party marketplaces (like `infocenter`) ship with auto-update **disabled by default** -- official Anthropic marketplaces have it on, but ours doesn't until you flip it. Do this once per machine:
 
-1. In any Claude Code session, type `/plugin` -> **Marketplaces** tab.
-2. Select **infocenter** from the list.
-3. Click **Enable auto-update**.
+1. `/plugin` -> **Marketplaces** tab.
+2. Select **infocenter**.
+3. **Enable auto-update**.
 
-That's it. Every Claude Code session start now polls `marketplace.json` from this repo, detects new versions, and installs them automatically. When a new version is detected mid-flow, Claude Code shows a one-line notification telling you to run `/reload-plugins`, which activates the new version in the current session -- no IDE restart, no fresh chat.
+After that, every Claude Code session start polls `marketplace.json` from this repo, detects new versions, and installs them. `/reload-plugins` activates the update in the current session -- no IDE restart, no fresh chat.
 
-If you want to globally opt out of auto-update, set `DISABLE_AUTOUPDATER=1` in your environment. If you want plugin auto-updates without Claude Code itself updating, set `FORCE_AUTOUPDATE_PLUGINS=1`.
+Global opt-out: `DISABLE_AUTOUPDATER=1` in your env. Plugin updates only (skip Claude Code itself): `FORCE_AUTOUPDATE_PLUGINS=1`.
 
-### Manual -- direct CLI commands (when auto-update is off, or to force-update mid-session)
+### 2. One-click "Update now" via the UI
 
-These bypass the Manage Plugins menu entirely. Identical behavior in the extension and the native CLI:
+When auto-update is off, or to force a refresh on demand:
+
+1. `/plugin` -> **Plugins** tab -> select **sn-toolkit @ infocenter**.
+2. Click **Update now** in the action menu.
+3. Run `/reload-plugins` to activate in the current session.
+
+Same flow in the VS Code extension panel and the native CLI -- the menu UI is identical.
+
+### 3. Direct slash commands (scripting / typing-only)
+
+Skip the menu entirely:
 
 ```
 /plugin uninstall sn-toolkit@infocenter
@@ -187,13 +197,13 @@ These bypass the Manage Plugins menu entirely. Identical behavior in the extensi
 /reload-plugins
 ```
 
-`/reload-plugins` activates the new version in the current session, so you don't need to start a new chat, restart your CLI, or reload the IDE window. The marketplace entry persists across uninstall, so you don't have to re-add it.
+The marketplace entry persists across uninstall, so the second command pulls from the cached marketplace metadata.
 
-### Why not `/plugin update`?
+### A note on `/plugin update`
 
-Claude Code's `/plugin` command exposes `install`, `uninstall`, `enable`, `disable`, and `marketplace add/remove/update/list` -- but no `update` for plugins themselves. The `marketplace update` subcommand only refreshes marketplace metadata; the plugin-level update path is auto-update + `/reload-plugins`, or the manual uninstall + install pair above. (If/when Anthropic adds a direct `/plugin update`, this section will get shorter.)
+Claude Code's `/plugin` slash command does not include an `update` subcommand. Update is a UI button (path 2) and a marketplace-level toggle (path 1), not a slash subcommand. The slash-command level only exposes `install`, `uninstall`, `enable`, `disable`, and `marketplace add/remove/update/list`.
 
-All workspaces using the plugin pick up the new version on the next session start regardless of which path you used. No per-project sync required.
+All three paths write to `~/.claude/plugins/cache/...`, so workspaces pick up the new version on next session start regardless of which path you used. No per-project sync required.
 
 ## Why a plugin instead of copying `.claude/` per project?
 

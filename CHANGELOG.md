@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.2] - 2026-05-01
+
+### Changed
+- Update-the-plugin docs corrected (third pass) to surface the **Update now** button in the `/plugin` UI action menu. Previous v1.15.1 docs claimed the only paths were marketplace-level auto-update or direct slash commands; the UI actually has a one-click **Update now** action when you select an installed plugin in the **Plugins** tab. Both READMEs now document three paths in order: (1) marketplace auto-update one-time toggle, (2) **Update now** UI button on demand, (3) direct `/plugin uninstall` + `/plugin install` + `/reload-plugins` slash commands. Note added that `/plugin update` is not a slash subcommand even though "update now" is a UI action.
+
 ## [1.15.1] - 2026-05-01
 
 ### Changed
@@ -153,6 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.15.2]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.2
 [1.15.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.1
 [1.15.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.0
 [1.14.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.14.0

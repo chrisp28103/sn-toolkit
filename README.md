@@ -53,19 +53,24 @@ sn-toolkit/README.md              -- full plugin documentation
 
 ## Updates
 
-There's no `/plugin update` slash command, but Claude Code has two clean update paths -- **auto-update** (recommended) or direct uninstall/install commands. Skip the trash-icon-and-restart dance entirely.
+Claude Code's `/plugin` UI has an **Update now** button -- skip the trash-icon-and-reinstall dance entirely. Three paths, in order of "best":
 
-### Recommended -- enable auto-update on the marketplace (one-time)
+### 1. Auto-update on the marketplace (one-time, set and forget)
 
 Third-party marketplaces have auto-update **disabled by default**. Turn it on once:
 
 1. `/plugin` -> **Marketplaces** tab -> select **infocenter** -> **Enable auto-update**.
-2. Done. Every Claude Code session start now checks for new sn-toolkit versions.
-3. When a new version ships, Claude Code shows a notification: run `/reload-plugins` and you're on the new version. No IDE restart, no fresh chat.
+2. Done. Every Claude Code session start now polls for new sn-toolkit versions and installs them automatically. `/reload-plugins` activates them mid-session with no IDE restart.
 
-### Manual -- direct CLI commands (when auto-update is off, or to force-update mid-session)
+### 2. One-click "Update now" via UI
 
-These bypass the Manage Plugins menu walk entirely. Same in extension or CLI:
+When auto-update is off, or you want to force a refresh:
+
+1. `/plugin` -> **Plugins** tab -> select **sn-toolkit @ infocenter**.
+2. Click **Update now**.
+3. `/reload-plugins` to activate in the current session.
+
+### 3. Direct slash commands (scripting, or if you prefer typing)
 
 ```
 /plugin uninstall sn-toolkit@infocenter
@@ -73,4 +78,4 @@ These bypass the Manage Plugins menu walk entirely. Same in extension or CLI:
 /reload-plugins
 ```
 
-`/reload-plugins` activates the new version in the current session -- no need to start a new chat or restart the IDE.
+All three paths end in the same place. `/reload-plugins` activates the new version in the current session -- no fresh chat, no IDE reload.
