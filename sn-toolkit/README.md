@@ -4,7 +4,7 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
 
 ## What's in the box
 
-- **26 slash commands** covering the full SN dev loop:
+- **27 slash commands** covering the full SN dev loop:
   - **Connect / inventory**: `start`, `end`, `creds`, `list`, `view-response`, `refresh`, `new-project`
   - **Read**: `pull`, `export`, `review`, `audit`
   - **Write**: `create` (schema-aware pre-flight), `update` (single-field + batch), `widget` (preview+refresh loop), `sync-push` (flush + drain + error-check)
@@ -14,7 +14,7 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
   - **Documentation**: `spec` (topic-agnostic two-part specification builder -- Part A functional + Part B technical, rendered to PDF; supports `--with-sn-pulls` for SN-anchored Part B), `docs-setup` (one-time opt-in clone of the official SN docs mirror), `docs-sync` (refresh that mirror)
   - **Operations**: `monitor` (use with `/loop 5m`), `diagnose`
 - **1 skill**: `sn-toolkit:docs` -- intent-triggered lookup against the official ServiceNow docs at github.com/servicenow/servicenowdocs (Apache 2.0). Three-tier lazy load (search -> peek -> read) keeps token usage minimal; works with or without the local cache.
-- **2 subagents**: `sn-explorer` (deep instance exploration, also consults the docs mirror for platform questions) and `sn-reviewer` (code-review against SN scripting standards).
+- **3 subagents**: `sn-explorer` (deep instance exploration, also consults the docs mirror for platform questions), `sn-reviewer` (code-review against SN scripting standards), and `sn-platform-admin` (instance-level concerns: ACLs, domain separation, sys_properties, update sets, email).
 - **5 hooks**: SessionStart (auto-connect to SN), PreToolUse/PostToolUse (block BOM-writes, validate encoding on sn-scriptsync files), Stop (async error check), PostCompact (re-inject session scratchpad).
 - **3 bin scripts on PATH** while the plugin is enabled:
   - `sn-agent-api.ps1` -- thin PowerShell wrapper around SN Utils' Agent API (the browser-extension bridge)

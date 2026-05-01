@@ -176,5 +176,45 @@ if ($Event -eq 'PostToolUse') {
         [Console]::Error.WriteLine($msg)
         exit 2
     }
+
+    # SN security pattern scan -- non-blocking warnings via PostToolUse exit 2.
+    # PostToolUse exit 2 does NOT reverse the edit; it surfaces stderr to Claude as
+    # feedback on the next turn so it can fix the introduced issue.
+    # Patterns are conservative; false positives go through to Claude as advisories,
+    # not hard fails.
+    $warnings = @()
+
+    if ($ext -eq '.js') {
+        if ($content -match '\bgs\.evaluate\s*\(') {
+            $warnings += "gs.evaluate() runs arbitrary scripts -- prefer explicit logic or GlideScopedEvaluator"
+        }
+        if ($content -match '(?<![A-Za-z0-9_.])eval\s*\(') {
+            $warnings += "eval() runs arbitrary code -- forbidden in scoped apps"
+        }
+        if ($content -match '\bqueryNoDomain\s*\(') {
+            $warnings += "queryNoDomain() bypasses domain ACLs -- confirm intentional and document why"
+        }
+        if ($content -match '\bgs\.include\s*\([^)"'']+\+') {
+            $warnings += "gs.include() with concatenated argument -- dynamic includes are a maintenance/security risk"
+        }
+        if ($content -match '\bsetRedirectURL\s*\(\s*[a-zA-Z_$][a-zA-Z0-9_$.]*\s*\)') {
+            $warnings += "setRedirectURL() with a variable -- validate the URL to avoid open-redirect"
+        }
+    }
+
+    if ($ext -eq '.html') {
+        if ($content -match 'ng-bind-html\b' -and $content -notmatch '\$sce\.trustAsHtml') {
+            $warnings += "ng-bind-html without `$sce.trustAsHtml in scope -- raw HTML binding can enable XSS"
+        }
+    }
+
+    if ($warnings.Count -gt 0) {
+        $fileName = [System.IO.Path]::GetFileName($filePath)
+        $msg = "SN-SECURITY: $fileName has potential security patterns (review and confirm intent):`n" +
+               ($warnings -join "`n") +
+               "`nThe edit was applied; this is advisory feedback to verify before continuing."
+        [Console]::Error.WriteLine($msg)
+        exit 2
+    }
     exit 0
 }

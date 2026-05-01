@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2026-05-01
+
+### Added
+- `/sn-toolkit:claude-md-audit` -- new command that audits CLAUDE.md drift against the live instance via `query_records`. Checks that referenced tables, scopes, and script names exist on the instance and reports stale references grouped by severity (Critical = not found, Warning = inactive, Info = unverifiable).
+- `agents/sn-platform-admin.md` -- new SN Platform Admin agent, a role-specific counterpart to `sn-explorer`. Focuses on instance-level concerns: ACLs, domain separation, `sys_properties`, user criteria, update sets, approval routing, email intake. Dispatched when the user asks about platform-wide config rather than scoped-app scripting.
+
+### Changed
+- `/sn-toolkit:review` refactored to fan out parallel `SN Reviewer` agents (one per script, capped at 10) with per-finding confidence scoring (0-100, threshold 80). Findings below 80 are dropped from the report. Documents the ~5-10x token cost increase inline; the tradeoff is actionable-only output.
+- `hooks/tool-guard.ps1` PostToolUse now scans `.js` and `.html` files in the SN workspace for security patterns after each edit and surfaces findings to Claude via exit 2 stderr (advisory, does not reverse the edit). Patterns: `gs.evaluate()`, bare `eval()`, `queryNoDomain()`, dynamic `gs.include()` with string concatenation, `setRedirectURL()` with a variable, `ng-bind-html` without `$sce.trustAsHtml`.
+- `hooks/session-checkpoint.ps1` Stop handler now emits `decision: block` (preventing session exit) when the scriptsync queue has pending file writes or an unread async error. Previously these conditions only emitted a `systemMessage` warning while allowing exit. A `stop_hook_active` guard prevents infinite blocking: the hook exits cleanly if it has already fired once on the current Stop turn.
+
 ## [1.15.2] - 2026-05-01
 
 ### Changed
@@ -158,6 +169,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.16.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.0
 [1.15.2]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.2
 [1.15.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.1
 [1.15.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.0

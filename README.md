@@ -2,7 +2,7 @@
 
 This repo is a Claude Code plugin marketplace. It publishes one plugin:
 
-- **[sn-toolkit](sn-toolkit/)** -- ServiceNow dev kit: 26 slash commands, 1 skill, 2 subagents, 5 hooks, 4 rules, Agent API wrapper, DPAPI credential storage, official-docs lookup. Full docs in [sn-toolkit/README.md](sn-toolkit/README.md).
+- **[sn-toolkit](sn-toolkit/)** -- ServiceNow dev kit: 27 slash commands, 1 skill, 3 subagents, 5 hooks, 4 rules, Agent API wrapper, DPAPI credential storage, official-docs lookup. Full docs in [sn-toolkit/README.md](sn-toolkit/README.md).
 
 ## Prerequisites
 
