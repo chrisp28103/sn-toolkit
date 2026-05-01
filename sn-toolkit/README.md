@@ -4,20 +4,22 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
 
 ## What's in the box
 
-- **24 slash commands** covering the full SN dev loop:
+- **26 slash commands** covering the full SN dev loop:
   - **Connect / inventory**: `start`, `end`, `creds`, `list`, `view-response`, `refresh`, `new-project`
   - **Read**: `pull`, `export`, `review`, `audit`
   - **Write**: `create` (schema-aware pre-flight), `update` (single-field + batch), `widget` (preview+refresh loop), `sync-push` (flush + drain + error-check)
   - **Session context**: `switch` (update set / app scope / domain), `start` (surfaces active context)
   - **Visual debugging**: `inspect` (activate tab + `/tn` + screenshot), `attach` (upload files to any record)
   - **Planning**: `refine` (SN-flavored 4-D prompt refiner -- forces naming table/scope/update-set/domain before work), `refine-prompt` (general-purpose 4-D refiner for non-SN prompts)
-  - **Documentation**: `spec` (topic-agnostic two-part specification builder -- Part A functional + Part B technical, rendered to PDF; supports `--with-sn-pulls` for SN-anchored Part B)
+  - **Documentation**: `spec` (topic-agnostic two-part specification builder -- Part A functional + Part B technical, rendered to PDF; supports `--with-sn-pulls` for SN-anchored Part B), `docs-setup` (one-time opt-in clone of the official SN docs mirror), `docs-sync` (refresh that mirror)
   - **Operations**: `monitor` (use with `/loop 5m`), `diagnose`
-- **2 subagents**: `sn-explorer` (deep instance exploration) and `sn-reviewer` (code-review against SN scripting standards).
+- **1 skill**: `sn-toolkit:docs` -- intent-triggered lookup against the official ServiceNow docs at github.com/servicenow/servicenowdocs (Apache 2.0). Three-tier lazy load (search -> peek -> read) keeps token usage minimal; works with or without the local cache.
+- **2 subagents**: `sn-explorer` (deep instance exploration, also consults the docs mirror for platform questions) and `sn-reviewer` (code-review against SN scripting standards).
 - **5 hooks**: SessionStart (auto-connect to SN), PreToolUse/PostToolUse (block BOM-writes, validate encoding on sn-scriptsync files), Stop (async error check), PostCompact (re-inject session scratchpad).
-- **2 bin scripts on PATH** while the plugin is enabled:
+- **3 bin scripts on PATH** while the plugin is enabled:
   - `sn-agent-api.ps1` -- thin PowerShell wrapper around SN Utils' Agent API (the browser-extension bridge)
   - `sn-credentials.ps1` -- DPAPI-encrypted credential storage for instance auth
+  - `sn-docs.ps1` -- search/peek/read against the official ServiceNow docs mirror; uses ripgrep when on PATH, falls back to PowerShell `Select-String` otherwise
 - **4 rules** (markdown files with frontmatter `paths:` globs): `conventions.md`, `sn-scripting.md`, `sn-testing.md`, `sn-ui-components.md`. Reference these from your project CLAUDE.md.
 - **Autocomplete type defs** in `autocomplete/` for VS Code IntelliSense on ServiceNow APIs -- reference via `jsconfig.json`.
 
@@ -29,10 +31,10 @@ This plugin is a thin layer over the **sn-scriptsync** + **SN Utils** stack. Wit
 
 | Requirement | Notes |
 |-------------|-------|
-| **An IDE that supports VS Code extensions** | VS Code, Cursor, Windsurf, VSCodium, etc. The IDE itself is just the host -- what matters is that you can install the `sn-scriptsync` extension into it. Pure-terminal Claude Code (no IDE running) cannot drive this plugin. |
+| **An IDE that supports VS Code extensions** | VS Code, Cursor, Windsurf, VSCodium, etc. What matters is that the `sn-scriptsync` extension can run somewhere. Pure-terminal Claude Code with **no** VS-Code-style IDE running anywhere cannot drive this plugin -- something has to host sn-scriptsync. |
 | **`sn-scriptsync` extension** | The critical piece. Search "sn-scriptsync" in the VS Code Marketplace (or your IDE's equivalent). Creates the bridge between your local file system and the SN Utils browser extension, and serves the Agent API request/response loop under `instances/<instance>/agent/`. |
 | **SN Utils browser extension** | Chrome / Edge. Search "SN Utils" in the Chrome Web Store or Edge Add-ons. Exposes the helper tab in your SN instance; activate per-instance by typing `/token` in the SN URL. |
-| **Claude Code (extension in your IDE)** | Install Claude Code via your IDE's extension panel. The Manage Plugins UI (used to install this plugin) is part of that extension. |
+| **Claude Code -- extension OR native CLI** | Two equivalent surfaces. **Extension**: install Claude Code via your IDE's extension panel and use the Claude Code chat panel. **Native CLI**: install `claude` (https://claude.com/claude-code) and run it from the IDE's integrated terminal so it shares the sn-scriptsync workspace. Both expose the same `/plugin` slash command, write to the same `~/.claude/plugins/` cache, and drive this plugin identically. Pick whichever you prefer; you can also use both side-by-side. |
 
 **Nice to have:**
 
@@ -44,11 +46,13 @@ Install the required items before proceeding.
 
 ## Install
 
-### 1. Add the marketplace + install the plugin (Manage Plugins UI)
+### 1. Add the marketplace + install the plugin
 
-Install via the Claude Code extension in your IDE (VS Code / Cursor / Windsurf / etc.):
+`/plugin` is a Claude Code primitive -- it works identically from the VS Code extension panel and from the native CLI. Pick whichever surface you use day-to-day; both write to the same `~/.claude/plugins/` cache, so plugin state is shared.
 
-1. **Open the Manage Plugins dialog.** Easiest path: in the Claude Code chat input, type `/plugin` and select **Manage plugins** from the autocomplete menu. (Alternative: open the Claude Code panel in your IDE, scroll the panel to the **Customize** section, and click **Manage plugins** there.)
+#### Method A -- VS Code extension (Manage Plugins UI)
+
+1. **Open the Manage Plugins dialog.** Easiest path: in the Claude Code chat input, type `/plugin` and select **Manage plugins** from the autocomplete menu. (Alternative: open the Claude Code panel in your IDE, scroll to the **Customize** section, and click **Manage plugins** there.)
 2. **Add the marketplace.** In the dialog, switch to the **Marketplaces** tab. Paste the URL into the `GitHub repo, URL, or path...` input and click **Add**:
    ```
    https://github.com/chrisp28103/sn-toolkit.git
@@ -56,7 +60,17 @@ Install via the Claude Code extension in your IDE (VS Code / Cursor / Windsurf /
 3. **Enable the plugin.** Switch to the **Plugins** tab, find **sn-toolkit@infocenter** in the INSTALLED list, and toggle it **on**.
 4. **Restart your IDE** (or reload the window) so the SessionStart hook fires on the next Claude Code session.
 
-For local plugin development (before publishing), paste an absolute path to this repo into the marketplace input instead of the GitHub URL.
+#### Method B -- Native CLI in the IDE's integrated terminal
+
+If you have the native `claude` CLI on PATH (and you should -- it ships with extra capabilities not yet wired into the extension), this is faster and avoids the GUI:
+
+1. **Open the IDE's integrated terminal** in any folder you want to work from. (Still requires a VS-Code-style IDE for sn-scriptsync to run somewhere; the terminal just gives `claude` a workspace cwd to share.)
+2. **Start a CLI session**: `claude`
+3. In the CLI session, type `/plugin` -> **Manage plugins** -> **Marketplaces** tab -> paste `https://github.com/chrisp28103/sn-toolkit.git` -> **Add**.
+4. **Plugins** tab -> toggle **sn-toolkit@infocenter** on.
+5. `/exit` and re-launch `claude` so the SessionStart hook fires. (The CLI doesn't need a full IDE restart -- just a fresh CLI session.) **Note:** if you also have the VS Code extension running, its existing chat panels won't see the new plugin until you start a fresh chat in them.
+
+For local plugin development (before publishing), paste an absolute path to this repo into the marketplace input instead of the GitHub URL. Works from either method.
 
 ### 2. Add required permissions to `~/.claude/settings.json`
 
@@ -149,7 +163,9 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-The Manage Plugins UI doesn't expose an in-place update yet, so the most reliable workflow is delete + reinstall:
+`/plugin` doesn't expose in-place update yet on either surface, so the workflow is delete + reinstall. The cycle differs by surface:
+
+### Method A -- VS Code extension
 
 1. Type `/plugin` in chat -> **Manage plugins** -> **Plugins** tab.
 2. Click the trash icon next to **sn-toolkit@infocenter** to uninstall.
@@ -157,7 +173,13 @@ The Manage Plugins UI doesn't expose an in-place update yet, so the most reliabl
 4. Open Manage Plugins again (`/plugin`), find sn-toolkit in the **Plugins** tab, toggle it on. The marketplace entry persists, so you don't need to re-add it.
 5. Restart your IDE one more time. New version is live.
 
-All workspaces using the plugin pick up the update on next session start. No per-project sync required.
+### Method B -- Native CLI in integrated terminal (faster, no IDE restarts)
+
+1. In a `claude` CLI session in the integrated terminal: `/plugin` -> **Manage plugins** -> **Plugins** tab -> trash icon -> back to **Plugins** tab -> toggle **sn-toolkit@infocenter** on.
+2. `/exit`, then re-run `claude`. The new CLI session boots on the new plugin version.
+3. **If you also use the VS Code extension**, existing Claude Code panels in the IDE keep using the cached old version until you start a fresh chat in them. A full IDE restart is **not** required -- just clicking "New chat" in the Claude Code panel triggers a fresh SessionStart and picks up the new plugin cache.
+
+Either method writes to the same `~/.claude/plugins/cache/...` directory, so workspaces pick up the update on next session start regardless of which surface you used to push it. No per-project sync required.
 
 ## Why a plugin instead of copying `.claude/` per project?
 

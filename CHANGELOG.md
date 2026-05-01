@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2026-05-01
+
+### Added
+- New `sn-toolkit:docs` skill: lazy-loaded lookup against the official ServiceNow docs repo at github.com/servicenow/servicenowdocs (Apache 2.0, ~154 MB, pure markdown, AI-optimized -- no images). Three-tier flow mirrors `fluent:now-sdk-explain`: status -> search/list -> peek -> read. Skill body holds zero doc content; all bulk lives on disk or arrives via single-file webfetch.
+- New `bin/sn-docs.ps1` CLI on PATH with subcommands `sync | status | list | search | peek | read | webfetch | help`. Token-disciplined output: search caps hits at -Max (default 30), peek returns head + H2 outline (never full body), read only used after peek confirms relevance.
+- New `/sn-toolkit:docs-setup` slash command: explicit opt-in setup that clones servicenow/servicenowdocs to `$env:LOCALAPPDATA\sn-toolkit\servicenow-docs\` via `git clone --depth 1 --filter=blob:none` (shallow + blobless). Idempotent.
+- New `/sn-toolkit:docs-sync` slash command: user-initiated cache refresh via incremental `git pull --ff-only`.
+- `agents/sn-explorer.md` now consults `sn-docs` for ServiceNow platform/API/convention questions before answering, with citation to the GitHub source.
+
+### Changed
+- **Both READMEs** rewritten to document two install/update methods side by side: VS Code extension Manage Plugins UI, and native `claude` CLI run from the IDE's integrated terminal. `/plugin` is a Claude Code primitive; both surfaces share the same `~/.claude/plugins/` cache and drive this plugin identically. CLI flow avoids IDE restarts -- a fresh `claude` session is enough.
+- `bin/sn-docs.ps1` `search`: prefers ripgrep when on PATH (sub-second on the ~200 MB cache), falls back to PowerShell `Select-String` automatically when not (works everywhere, slower). Uses `--path-separator /` so the post-processing prefix-strip doesn't corrupt markdown escapes (`\(`, `\_`) inside snippet content.
+- `bin/sn-docs.ps1` `sync`: tolerant of Windows-specific clone quirks -- enables `core.longpaths=true` for paths exceeding MAX_PATH and `core.ignorecase=true` for case-collision warnings on the `markdown/security-management/` subtree. If 40+ product areas check out (real-world: all 50 are present), checkout warnings are surfaced but treated as non-fatal.
+
+### Design notes
+- Cache is **opt-in only**. A fresh plugin install never auto-clones. The skill works immediately without the cache via `webfetch` fallback (one HTTP fetch per file from raw.githubusercontent.com); local cache is a deliberate user-initiated upgrade for offline + ripgrep speed.
+- **No background refresh** -- no cron, no SessionStart pull, no auto-anything. Staleness reported by `sn-docs status` but never acted on.
+- Plugin manifest description updated `24 slash commands` -> `26 slash commands` and gains "official-docs lookup skill".
+- Default branch of upstream repo is `australia` (release family), not `main` -- citation URLs and webfetch base hard-coded to that.
+
 ## [1.14.0] - 2026-04-30
 
 ### Added
@@ -128,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.15.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.0
 [1.14.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.14.0
 [1.13.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.1
 [1.13.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.0
