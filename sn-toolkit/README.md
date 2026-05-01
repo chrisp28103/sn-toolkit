@@ -163,6 +163,8 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
+Where to run these: any active Claude Code session -- the **VS Code extension chat panel** or the **native `claude` CLI in your IDE's integrated terminal**, same as install. `/plugin` is a Claude Code primitive and behaves identically in both surfaces; both write to the same `~/.claude/plugins/` cache, so an update from one shows up in the other.
+
 Three paths, all converging on the same outcome. Pick whichever fits your workflow.
 
 ### 1. Auto-update on the marketplace (recommended, one-time)
