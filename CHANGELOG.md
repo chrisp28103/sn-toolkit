@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.1] - 2026-05-01
+
+### Changed
+- Update-the-plugin docs in both READMEs rewritten. The previous "uninstall via Manage Plugins UI trash icon -> restart IDE -> toggle on -> restart IDE" flow was replaced with two cleaner paths: (1) **enable auto-update** on the `infocenter` marketplace once via `/plugin -> Marketplaces -> Enable auto-update`, after which new versions install automatically at session start and a `/reload-plugins` activates them mid-session with no restart; (2) **direct CLI commands** `/plugin uninstall sn-toolkit@infocenter` + `/plugin install sn-toolkit@infocenter` + `/reload-plugins` for manual / forced updates. `/plugin update` does not exist as a Claude Code slash command -- both READMEs now explain why and what to use instead.
+
 ## [1.15.0] - 2026-05-01
 
 ### Added
@@ -148,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.15.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.1
 [1.15.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.0
 [1.14.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.14.0
 [1.13.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.13.1

@@ -8,7 +8,7 @@
       "name": "sn-toolkit",
       "source": "./sn-toolkit",
       "description": "ServiceNow dev kit for Claude Code: Agent API wrapper, DPAPI credential management, session hooks, 26 slash commands, explorer + reviewer agents, official-docs lookup skill.",
-      "version": "1.15.0",
+      "version": "1.15.1",
       "author": { "name": "Chris Perry" },
       "homepage": "https://github.com/chrisp28103/sn-toolkit",
       "keywords": ["servicenow", "claude-code", "sn-scriptsync", "agent-api"]

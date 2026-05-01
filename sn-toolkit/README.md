@@ -163,23 +163,37 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-`/plugin` doesn't expose in-place update yet on either surface, so the workflow is delete + reinstall. The cycle differs by surface:
+There's no `/plugin update` slash command in Claude Code, but you don't need one. Two clean paths:
 
-### Method A -- VS Code extension
+### Recommended -- enable auto-update on the marketplace (one-time)
 
-1. Type `/plugin` in chat -> **Manage plugins** -> **Plugins** tab.
-2. Click the trash icon next to **sn-toolkit@infocenter** to uninstall.
-3. Restart your IDE.
-4. Open Manage Plugins again (`/plugin`), find sn-toolkit in the **Plugins** tab, toggle it on. The marketplace entry persists, so you don't need to re-add it.
-5. Restart your IDE one more time. New version is live.
+Third-party marketplaces (like `infocenter`) have auto-update **disabled by default** -- official Anthropic marketplaces have it on by default, but ours doesn't until you turn it on. Do this once per machine:
 
-### Method B -- Native CLI in integrated terminal (faster, no IDE restarts)
+1. In any Claude Code session, type `/plugin` -> **Marketplaces** tab.
+2. Select **infocenter** from the list.
+3. Click **Enable auto-update**.
 
-1. In a `claude` CLI session in the integrated terminal: `/plugin` -> **Manage plugins** -> **Plugins** tab -> trash icon -> back to **Plugins** tab -> toggle **sn-toolkit@infocenter** on.
-2. `/exit`, then re-run `claude`. The new CLI session boots on the new plugin version.
-3. **If you also use the VS Code extension**, existing Claude Code panels in the IDE keep using the cached old version until you start a fresh chat in them. A full IDE restart is **not** required -- just clicking "New chat" in the Claude Code panel triggers a fresh SessionStart and picks up the new plugin cache.
+That's it. Every Claude Code session start now polls `marketplace.json` from this repo, detects new versions, and installs them automatically. When a new version is detected mid-flow, Claude Code shows a one-line notification telling you to run `/reload-plugins`, which activates the new version in the current session -- no IDE restart, no fresh chat.
 
-Either method writes to the same `~/.claude/plugins/cache/...` directory, so workspaces pick up the update on next session start regardless of which surface you used to push it. No per-project sync required.
+If you want to globally opt out of auto-update, set `DISABLE_AUTOUPDATER=1` in your environment. If you want plugin auto-updates without Claude Code itself updating, set `FORCE_AUTOUPDATE_PLUGINS=1`.
+
+### Manual -- direct CLI commands (when auto-update is off, or to force-update mid-session)
+
+These bypass the Manage Plugins menu entirely. Identical behavior in the extension and the native CLI:
+
+```
+/plugin uninstall sn-toolkit@infocenter
+/plugin install sn-toolkit@infocenter
+/reload-plugins
+```
+
+`/reload-plugins` activates the new version in the current session, so you don't need to start a new chat, restart your CLI, or reload the IDE window. The marketplace entry persists across uninstall, so you don't have to re-add it.
+
+### Why not `/plugin update`?
+
+Claude Code's `/plugin` command exposes `install`, `uninstall`, `enable`, `disable`, and `marketplace add/remove/update/list` -- but no `update` for plugins themselves. The `marketplace update` subcommand only refreshes marketplace metadata; the plugin-level update path is auto-update + `/reload-plugins`, or the manual uninstall + install pair above. (If/when Anthropic adds a direct `/plugin update`, this section will get shorter.)
+
+All workspaces using the plugin pick up the new version on the next session start regardless of which path you used. No per-project sync required.
 
 ## Why a plugin instead of copying `.claude/` per project?
 

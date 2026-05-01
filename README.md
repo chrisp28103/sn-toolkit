@@ -53,19 +53,24 @@ sn-toolkit/README.md              -- full plugin documentation
 
 ## Updates
 
-`/plugin` has no in-place update yet on either surface, so the path is delete + reinstall. Two flavors:
+There's no `/plugin update` slash command, but Claude Code has two clean update paths -- **auto-update** (recommended) or direct uninstall/install commands. Skip the trash-icon-and-restart dance entirely.
 
-### Method A -- VS Code extension
+### Recommended -- enable auto-update on the marketplace (one-time)
 
-1. `/plugin` -> **Manage plugins** -> **Plugins** tab -> trash icon next to **sn-toolkit@infocenter**.
-2. Restart your IDE.
-3. `/plugin` -> **Manage plugins** -> **Plugins** tab -> toggle **sn-toolkit@infocenter** on (marketplace entry persists).
-4. Restart your IDE. New version is live.
+Third-party marketplaces have auto-update **disabled by default**. Turn it on once:
 
-### Method B -- Native CLI in integrated terminal (faster)
+1. `/plugin` -> **Marketplaces** tab -> select **infocenter** -> **Enable auto-update**.
+2. Done. Every Claude Code session start now checks for new sn-toolkit versions.
+3. When a new version ships, Claude Code shows a notification: run `/reload-plugins` and you're on the new version. No IDE restart, no fresh chat.
 
-1. In a `claude` CLI session in the integrated terminal: `/plugin` -> **Manage plugins** -> **Plugins** tab -> trash icon -> toggle on again.
-2. `/exit`, then `claude` again -- the new CLI session boots on the new version.
-3. **Existing VS Code extension Claude Code panels** still see the old version until you start a fresh chat in them (or reload the IDE window). A full IDE restart is **not** required -- a new Claude Code session in the panel picks up the new plugin cache.
+### Manual -- direct CLI commands (when auto-update is off, or to force-update mid-session)
 
-All workspaces using the plugin pick up the new version on the next session start.
+These bypass the Manage Plugins menu walk entirely. Same in extension or CLI:
+
+```
+/plugin uninstall sn-toolkit@infocenter
+/plugin install sn-toolkit@infocenter
+/reload-plugins
+```
+
+`/reload-plugins` activates the new version in the current session -- no need to start a new chat or restart the IDE.
