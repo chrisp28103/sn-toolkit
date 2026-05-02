@@ -163,7 +163,7 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-Where to run these: any active Claude Code session -- the **VS Code extension chat panel** or the **native `claude` CLI in your IDE's integrated terminal**, same as install. `/plugin` is a Claude Code primitive and behaves identically in both surfaces; both write to the same `~/.claude/plugins/` cache, so an update from one shows up in the other.
+Where to run these: paths 1 and 2 (the preferred ones) require the **native `claude` CLI** running in your IDE's integrated terminal. The **Enable auto-update** toggle (Marketplaces tab) and the **Update now** button (Plugins tab) live in the CLI's `/plugin` interactive UI; they are **not** exposed in the VS Code extension's Manage Plugins panel. Path 3 (direct slash commands) works from either surface. Both surfaces write to the same `~/.claude/plugins/` cache, so a CLI-driven update shows up the next time you start a chat in the extension panel.
 
 Three paths, all converging on the same outcome. Pick whichever fits your workflow.
 
@@ -187,7 +187,7 @@ When auto-update is off, or to force a refresh on demand:
 2. Click **Update now** in the action menu.
 3. Run `/reload-plugins` to activate in the current session.
 
-Same flow in the VS Code extension panel and the native CLI -- the menu UI is identical.
+**CLI only** -- the **Update now** action lives in the `claude` CLI's interactive `/plugin` menu and is not surfaced in the VS Code extension's Manage Plugins panel. Run from your IDE's integrated terminal.
 
 ### 3. Direct slash commands (scripting / typing-only)
 

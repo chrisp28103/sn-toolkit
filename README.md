@@ -53,9 +53,9 @@ sn-toolkit/README.md              -- full plugin documentation
 
 ## Updates
 
-Where to run these: any active Claude Code session -- the **VS Code extension chat panel** or the **native `claude` CLI in your IDE's integrated terminal**, same as install. `/plugin` is a Claude Code primitive and behaves identically in both. Both surfaces share `~/.claude/plugins/`, so an update from one is visible to the other.
+Where to run these: paths 1 and 2 (the preferred ones) require the **native `claude` CLI** running in your IDE's integrated terminal -- the **Enable auto-update** toggle and the **Update now** button live in the CLI's `/plugin` interactive UI and are not exposed in the VS Code extension's Manage Plugins panel. Path 3 (direct slash commands) works from either surface. Both surfaces share `~/.claude/plugins/`, so an update from the CLI is visible to the extension's chat panel.
 
-Claude Code's `/plugin` UI has an **Update now** button -- skip the trash-icon-and-reinstall dance entirely. Three paths, in order of "best":
+Claude Code's `/plugin` UI (CLI) has an **Update now** button -- skip the trash-icon-and-reinstall dance entirely. Three paths, in order of "best":
 
 ### 1. Auto-update on the marketplace (one-time, set and forget)
 
