@@ -163,35 +163,48 @@ Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`,
 
 ## Updating the plugin
 
-Where to run these: paths 1 and 2 (the preferred ones) require the **native `claude` CLI** running in your IDE's integrated terminal. The **Enable auto-update** toggle (Marketplaces tab) and the **Update now** button (Plugins tab) live in the CLI's `/plugin` interactive UI; they are **not** exposed in the VS Code extension's Manage Plugins panel. Path 3 (direct slash commands) works from either surface. Both surfaces write to the same `~/.claude/plugins/` cache, so a CLI-driven update shows up the next time you start a chat in the extension panel.
+First, terminology. "Claude Code" ships as **two separate products** that are easy to confuse:
+
+- **Claude Code CLI** -- the `claude` command-line binary. Install from npm/Anthropic and run it in your IDE's integrated terminal (`claude`). Interactive `/plugin` menu, `/reload-plugins`, autocomplete -- all live here.
+- **Claude Code VS Code extension** -- a chat panel installed from the VS Code Marketplace. Lives in the VS Code sidebar; has its own **Manage Plugins** UI under **Customize**.
+
+They share `~/.claude/plugins/` (a plugin installed in one is visible in the other) but they are **not** the same UI. The features available in each differ -- and plugin updates is one of those differences.
+
+**Run all plugin updates from the Claude Code CLI**, not from the Claude Code VS Code extension.
+
+Why this matters: the **Enable auto-update** toggle (Marketplaces tab) and the **Update now** button (Plugins tab) only exist in the Claude Code CLI's interactive `/plugin` UI. The VS Code extension's Manage Plugins panel exposes neither -- to update from the extension you have to uninstall the plugin, restart VS Code, reinstall the plugin, then restart VS Code again. Open the integrated terminal, run `claude` once, and you skip the dance forever. Updates you make from the CLI propagate immediately to the extension's chat panel (next session start picks them up).
 
 Three paths, all converging on the same outcome. Pick whichever fits your workflow.
 
-### 1. Auto-update on the marketplace (recommended, one-time)
+### 1. Auto-update on the marketplace (recommended, one-time) -- CLI only
 
 Third-party marketplaces (like `infocenter`) ship with auto-update **disabled by default** -- official Anthropic marketplaces have it on, but ours doesn't until you flip it. Do this once per machine:
 
-1. `/plugin` -> **Marketplaces** tab.
-2. Select **infocenter**.
-3. **Enable auto-update**.
+1. Open your IDE's integrated terminal and run `claude` (the **Claude Code CLI**).
+2. In the CLI, type `/plugin` -> **Marketplaces** tab.
+3. Select **infocenter**.
+4. **Enable auto-update**.
 
-After that, every Claude Code session start polls `marketplace.json` from this repo, detects new versions, and installs them. `/reload-plugins` activates the update in the current session -- no IDE restart, no fresh chat.
+After that, every CLI session start polls `marketplace.json` from this repo, detects new versions, and installs them. `/reload-plugins` activates the update in the current session -- no IDE restart, no fresh chat.
 
 Global opt-out: `DISABLE_AUTOUPDATER=1` in your env. Plugin updates only (skip Claude Code itself): `FORCE_AUTOUPDATE_PLUGINS=1`.
 
-### 2. One-click "Update now" via the UI
+The Claude Code VS Code extension's Manage Plugins panel does not expose the **Enable auto-update** toggle -- this path is reachable only from the Claude Code CLI.
+
+### 2. One-click "Update now" via the UI -- CLI only
 
 When auto-update is off, or to force a refresh on demand:
 
-1. `/plugin` -> **Plugins** tab -> select **sn-toolkit @ infocenter**.
-2. Click **Update now** in the action menu.
-3. Run `/reload-plugins` to activate in the current session.
+1. Open your IDE's integrated terminal and run `claude` (the **Claude Code CLI**).
+2. In the CLI, type `/plugin` -> **Plugins** tab -> select **sn-toolkit @ infocenter**.
+3. Click **Update now** in the action menu.
+4. Run `/reload-plugins` to activate in the current session.
 
-**CLI only** -- the **Update now** action lives in the `claude` CLI's interactive `/plugin` menu and is not surfaced in the VS Code extension's Manage Plugins panel. Run from your IDE's integrated terminal.
+The **Update now** action lives in the Claude Code CLI's interactive `/plugin` menu. The Claude Code VS Code extension's Manage Plugins panel does not expose this button.
 
-### 3. Direct slash commands (scripting / typing-only)
+### 3. Direct slash commands (works in either product)
 
-Skip the menu entirely:
+If you can't open a CLI session in the integrated terminal, the slash commands still work from the Claude Code VS Code extension's chat panel:
 
 ```
 /plugin uninstall sn-toolkit@infocenter
@@ -199,7 +212,7 @@ Skip the menu entirely:
 /reload-plugins
 ```
 
-The marketplace entry persists across uninstall, so the second command pulls from the cached marketplace metadata.
+The marketplace entry persists across uninstall, so the second command pulls from the cached marketplace metadata. No IDE restart required -- `/reload-plugins` activates the new version in place.
 
 ### A note on `/plugin update`
 
@@ -211,4 +224,4 @@ All three paths write to `~/.claude/plugins/cache/...`, so workspaces pick up th
 
 Prior approach: a template directory (`sn-toolkit/`) was copy-duplicated into each new SN workspace via a bootstrap script. This produced per-project `.claude/` copies that drifted from the template whenever infrastructure changed, and teammates had no easy way to pick up updates.
 
-Plugin-based approach: the `.claude/` infrastructure (hooks, commands, agents, bin scripts) lives in exactly one place -- this repo -- and every workspace loads it dynamically. Updates propagate the next time anyone reinstalls the plugin via Manage Plugins. Drift is structurally impossible.
+Plugin-based approach: the `.claude/` infrastructure (hooks, commands, agents, bin scripts) lives in exactly one place -- this repo -- and every workspace loads it dynamically. Updates propagate via the marketplace auto-update toggle (or any of the update paths above). Drift is structurally impossible.

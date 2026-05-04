@@ -53,26 +53,43 @@ sn-toolkit/README.md              -- full plugin documentation
 
 ## Updates
 
-Where to run these: paths 1 and 2 (the preferred ones) require the **native `claude` CLI** running in your IDE's integrated terminal -- the **Enable auto-update** toggle and the **Update now** button live in the CLI's `/plugin` interactive UI and are not exposed in the VS Code extension's Manage Plugins panel. Path 3 (direct slash commands) works from either surface. Both surfaces share `~/.claude/plugins/`, so an update from the CLI is visible to the extension's chat panel.
+First, terminology. "Claude Code" ships as **two separate products** that are easy to confuse:
 
-Claude Code's `/plugin` UI (CLI) has an **Update now** button -- skip the trash-icon-and-reinstall dance entirely. Three paths, in order of "best":
+- **Claude Code CLI** -- the `claude` command-line binary. Install it from npm/Anthropic and run it in your IDE's integrated terminal (`claude`). Interactive `/plugin` menu, `/reload-plugins`, autocomplete -- all live here.
+- **Claude Code VS Code extension** -- a chat panel installed from the VS Code Marketplace. Lives in the VS Code sidebar, has its own **Manage Plugins** UI under **Customize**.
 
-### 1. Auto-update on the marketplace (one-time, set and forget)
+They share `~/.claude/plugins/` (so a plugin installed in one is visible in the other) but they are **not** the same UI. The features available in each differ.
 
-Third-party marketplaces have auto-update **disabled by default**. Turn it on once:
+**Run all plugin updates from the Claude Code CLI**, not from the Claude Code VS Code extension.
 
-1. `/plugin` -> **Marketplaces** tab -> select **infocenter** -> **Enable auto-update**.
-2. Done. Every Claude Code session start now polls for new sn-toolkit versions and installs them automatically. `/reload-plugins` activates them mid-session with no IDE restart.
+Why: the **Enable auto-update** toggle (Marketplaces tab) and the **Update now** button (Plugins tab) only exist in the CLI's interactive `/plugin` UI. The VS Code extension's Manage Plugins panel exposes neither -- to update from the extension you have to uninstall the plugin, restart VS Code, reinstall the plugin, then restart VS Code again. Run `claude` in your IDE's integrated terminal once and you skip that dance forever. Updates you make in the CLI are immediately visible to the extension's chat panel on its next session start.
 
-### 2. One-click "Update now" via UI
+Three paths, in order of "best":
+
+### 1. Auto-update on the marketplace (one-time, set and forget) -- CLI only
+
+Third-party marketplaces have auto-update **disabled by default**. Turn it on once from the CLI:
+
+1. Open your IDE's integrated terminal and run `claude` (the **Claude Code CLI**).
+2. In the CLI, type `/plugin` -> **Marketplaces** tab -> select **infocenter** -> **Enable auto-update**.
+3. Done. Every CLI session start now polls for new sn-toolkit versions and installs them automatically. `/reload-plugins` activates them mid-session with no IDE restart.
+
+The Claude Code VS Code extension's Manage Plugins panel does not expose this toggle.
+
+### 2. One-click "Update now" via UI -- CLI only
 
 When auto-update is off, or you want to force a refresh:
 
-1. `/plugin` -> **Plugins** tab -> select **sn-toolkit @ infocenter**.
-2. Click **Update now**.
-3. `/reload-plugins` to activate in the current session.
+1. Open your IDE's integrated terminal and run `claude` (the **Claude Code CLI**).
+2. In the CLI, type `/plugin` -> **Plugins** tab -> select **sn-toolkit @ infocenter**.
+3. Click **Update now**.
+4. `/reload-plugins` to activate in the current session.
 
-### 3. Direct slash commands (scripting, or if you prefer typing)
+The Claude Code VS Code extension's Manage Plugins panel does not expose this button.
+
+### 3. Direct slash commands (works in either product)
+
+If you only have the Claude Code VS Code extension's chat panel open, this path still works -- the slash commands are universal:
 
 ```
 /plugin uninstall sn-toolkit@infocenter
@@ -80,4 +97,6 @@ When auto-update is off, or you want to force a refresh:
 /reload-plugins
 ```
 
-All three paths end in the same place. `/reload-plugins` activates the new version in the current session -- no fresh chat, no IDE reload.
+No IDE restart required -- `/reload-plugins` activates the new version in the current session.
+
+All three paths end in the same place. Paths 1 and 2 (CLI-only) are strongly preferred; reach for path 3 only if you can't open a CLI session in the integrated terminal.
