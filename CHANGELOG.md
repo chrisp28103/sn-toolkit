@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.1] - 2026-05-04
+
+### Fixed
+- `bin/sn-agent-api.ps1` `ConvertTo-JsonValue` helper used `return if ($val) { "true" } else { "false" }`, which is PS7-only syntax. On Windows PowerShell 5.1 it raised "the term 'if' is not recognized" and broke any command whose `Params` hashtable contained a boolean (notably `switch_context` with `reloadTab=$true`). Rewritten as `if ($val) { return "true" } else { return "false" }`. Verified against zerovector PROD on 2026-05-04. Non-boolean param paths are unchanged.
+
 ## [1.16.0] - 2026-05-01
 
 ### Added
@@ -169,6 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.16.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.1
 [1.16.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.0
 [1.15.2]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.2
 [1.15.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.1

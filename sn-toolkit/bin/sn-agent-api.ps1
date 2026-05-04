@@ -125,7 +125,7 @@ function ConvertTo-JsonValue($val) {
         return "[$($items -join ',')]"
     }
     elseif ($val -is [bool]) {
-        return if ($val) { "true" } else { "false" }
+        if ($val) { return "true" } else { return "false" }
     }
     elseif ($val -is [int] -or $val -is [long] -or $val -is [double]) {
         return "$val"
