@@ -14,34 +14,44 @@ $ARGUMENTS should contain the project name and instance, and optionally a custom
 
 1. Parse `<name>` and `<instance>` from $ARGUMENTS. Parse optional `<scope>` (3rd positional or `--scope <value>`). If scope was not provided, omit the `-Scope` argument below so the bootstrap script uses its default (`global`).
 
-2. Run the bootstrap script. It's on PATH from the plugin's bin/:
+2. Ask the user where to create the project (which parent directory). Use AskUserQuestion. Suggested default: `[Environment]::GetFolderPath('MyDocuments')` joined with `ServiceNow` (OneDrive-aware on Windows). Common alternates: `~/code/`, `~/projects/servicenow/`, a client-specific dropbox folder, etc. Pass the user's answer as `-OutputDir` in the next step.
+
+   Rationale: bootstrap runs under a redirected stdin (this is a Claude tool call), so the script's interactive prompt is suppressed and it would silently use the default. Asking here surfaces the choice to the user and keeps the plugin folder-layout-agnostic across teammates.
+
+3. Run the bootstrap script. It's on PATH from the plugin's bin/:
 ```powershell
-bootstrap-project.ps1 -Name "<name>" -Instance "<instance>"
+bootstrap-project.ps1 -Name "<name>" -Instance "<instance>" -OutputDir "<chosen-parent-dir>"
 # Add -Scope "<scope>" only if the user supplied one
 ```
 
-3. Open the new project folder as your workspace in the IDE. The bootstrap script prints the exact path when it finishes.
+4. Open the new project folder as your workspace in the IDE. The bootstrap script prints the exact path when it finishes.
 
-4. In the new workspace, run `/sn-toolkit:creds` to configure the instance credentials.
+5. In the new workspace, run `/sn-toolkit:creds` to configure the instance credentials.
 
-5. Connect sn-scriptsync to the `instances/<instance>` directory (click the sn-scriptsync status-bar item in VS Code, confirm the target dir).
+6. Connect sn-scriptsync to the `instances/<instance>` directory (click the sn-scriptsync status-bar item in VS Code, confirm the target dir).
 
-6. Open the SN Utils helper tab in the browser on the target instance (type `/token` in ServiceNow). This is the bridge that the Agent API uses.
+7. Open the SN Utils helper tab in the browser on the target instance (type `/token` in ServiceNow). This is the bridge that the Agent API uses.
 
-7. Run `/sn-toolkit:start` to verify the round-trip (scriptsync server + browser connection).
+8. Run `/sn-toolkit:start` to verify the round-trip (scriptsync server + browser connection).
 
-8. Optionally run `/sn-toolkit:refresh` if your project provides a `scripts/refresh-architecture.ps1` to build the initial architecture catalog.
+9. Optionally run `/sn-toolkit:refresh` if your project provides a `scripts/refresh-architecture.ps1` to build the initial architecture catalog.
 
 ## Examples
 
 Exploring an instance with no scope commitment yet (most common):
 ```powershell
-bootstrap-project.ps1 -Name "aha" -Instance "ahadev"
+bootstrap-project.ps1 -Name "aha" -Instance "ahadev" -OutputDir "C:\Users\me\OneDrive\Documents\ServiceNow"
 ```
 
 Building on a known custom scope:
 ```powershell
-bootstrap-project.ps1 -Name "aha" -Instance "ahadev" -Scope "x_icir_aha"
+bootstrap-project.ps1 -Name "aha" -Instance "ahadev" -Scope "x_icir_aha" -OutputDir "C:\Users\me\OneDrive\Documents\ServiceNow"
+```
+
+Run without `-OutputDir` (standalone interactive use, e.g., a teammate in a plain PowerShell window):
+```powershell
+bootstrap-project.ps1 -Name "aha" -Instance "ahadev"
+# Script will prompt: "Where should this project be created? Default: <MyDocuments>\ServiceNow"
 ```
 
 ## Why scope is optional
@@ -53,3 +63,5 @@ If you later commit to a custom scope, edit `.claude/project.json` to set `"scop
 ## Standalone use (no Claude session running)
 
 If you want to bootstrap a new workspace BEFORE opening any Claude session (e.g., a teammate's first-time setup), invoke the script by its full plugin-install path. See the plugin README for the exact path format on your machine.
+
+When invoked from an interactive PowerShell window with no `-OutputDir`, the script prompts for the parent directory and offers `[Environment]::GetFolderPath('MyDocuments')\ServiceNow` as the default -- which respects OneDrive's Documents-folder redirect. Press Enter to accept, or paste a different path.

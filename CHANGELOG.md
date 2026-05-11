@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] - 2026-05-11
+
+### Fixed
+- `bin/bootstrap-project.ps1` `-OutputDir` default was `$env:USERPROFILE\Documents\ServiceNow`, which silently bypasses OneDrive's Known Folder Move redirect of the Documents folder. On OneDrive-redirected machines new projects landed in the unredirected `C:\Users\<user>\Documents\ServiceNow` rather than the user's actual OneDrive Documents tree. Default is now empty; the script resolves via `Read-Host` prompt when run from an interactive shell, or falls back to `[Environment]::GetFolderPath('MyDocuments')\ServiceNow` silently when `[Console]::IsInputRedirected` is true (Claude tool calls, CI, piped input). `GetFolderPath('MyDocuments')` is the OneDrive-aware API.
+- `CLAUDE.md.template` directory-structure block hardcoded both `__SCOPE__/` and `global/` lines, so when `-Scope global` was passed (OOB engagements) the generated CLAUDE.md rendered `global/` twice. Replaced both lines with a single `__SCOPE_DIR_BLOCK__` placeholder; `bin/bootstrap-project.ps1` now substitutes either a one-line block (`Scope=global`) or a two-line block (custom scope + `global/`) before writing the file.
+
+### Changed
+- `/sn-toolkit:new-project` skill inserts a new step asking the user where to create the project via `AskUserQuestion` and passes the answer to `bootstrap-project.ps1` as `-OutputDir`. Rationale: bootstrap runs under a redirected stdin when invoked as a Claude tool call, which suppresses the script's interactive prompt and would silently use the default. Surfacing the choice in the skill keeps the plugin folder-layout-agnostic across teammates. Subsequent steps renumbered; examples updated to show explicit `-OutputDir` plus a no-arg standalone-interactive case.
+
 ## [1.16.1] - 2026-05-04
 
 ### Fixed
@@ -174,6 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sn-credentials.ps1` -- DPAPI-encrypted credential storage.
 - `bootstrap-project.ps1` -- new SN workspace scaffolding.
 
+[1.17.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.17.0
 [1.16.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.1
 [1.16.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.0
 [1.15.2]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.2

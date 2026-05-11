@@ -20,11 +20,36 @@ param(
     [Parameter(Mandatory)][string]$Instance,
     [string]$Scope = "global",
     [string]$InstanceUrl = "",
-    [string]$OutputDir = (Join-Path $env:USERPROFILE "Documents\ServiceNow")
+    [string]$OutputDir = ""
 )
 
 $ErrorActionPreference = "Stop"
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+# Resolve output directory: explicit -OutputDir wins. Otherwise prompt the
+# user (interactive shell) or fall back to the OneDrive-aware default when
+# stdin is redirected (Claude tool calls, CI, piped input). We use
+# [Environment]::GetFolderPath('MyDocuments') -- NOT $env:USERPROFILE\Documents
+# -- because the latter ignores OneDrive's Documents-folder redirect.
+if (-not $OutputDir) {
+    $myDocs = [Environment]::GetFolderPath('MyDocuments')
+    $suggestedDefault = Join-Path $myDocs "ServiceNow"
+    if ([Console]::IsInputRedirected) {
+        $OutputDir = $suggestedDefault
+        Write-Host "Output dir (non-interactive, using default): $OutputDir" -ForegroundColor DarkYellow
+    } else {
+        Write-Host ""
+        Write-Host "Where should this project be created?" -ForegroundColor Yellow
+        Write-Host "  Default: $suggestedDefault"
+        Write-Host "  (press Enter to accept, or type a different path)"
+        $userInput = Read-Host "Output dir"
+        if ([string]::IsNullOrWhiteSpace($userInput)) {
+            $OutputDir = $suggestedDefault
+        } else {
+            $OutputDir = $userInput.Trim().Trim('"').Trim("'")
+        }
+    }
+}
 
 # Plugin root (this script lives in <plugin-root>/bin/)
 $pluginRoot = Split-Path $PSScriptRoot -Parent
@@ -89,6 +114,15 @@ if (-not (Test-Path $templatePath)) {
     exit 1
 }
 $template = Get-Content $templatePath -Raw
+# For OOB / global engagements, the dir-structure block collapses to a
+# single global/ line. For scoped engagements, it lists both the scoped
+# app dir and the global/ dir.
+$scopeDirBlock = if ($Scope -eq "global") {
+    "  global/                         -- global scope files (scripts, widgets, BRs)"
+} else {
+    "  $Scope/                      -- scoped app files (scripts, widgets, BRs)`n  global/                         -- global scope files"
+}
+$template = $template -replace '__SCOPE_DIR_BLOCK__', $scopeDirBlock
 $template = $template -replace '__PROJECT_NAME__', $Name
 $template = $template -replace '__SCOPE__', $Scope
 $template = $template -replace '__INSTANCE__', $Instance

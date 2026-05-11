@@ -10,8 +10,7 @@
 ## Directory Structure
 ```
 __INSTANCE__/                     -- sn-scriptsync BI-DIRECTIONAL sync workspace
-  __SCOPE__/                      -- scoped app files (scripts, widgets, BRs)
-  global/                         -- global scope files
+__SCOPE_DIR_BLOCK__
 instances/__INSTANCE__/           -- Agent API workspace (NOT synced to SN)
   agent/requests/                 -- Agent API request JSON
   agent/responses/                -- Agent API response JSON
