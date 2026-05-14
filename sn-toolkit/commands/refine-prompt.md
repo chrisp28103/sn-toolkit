@@ -1,5 +1,5 @@
 ---
-description: Refine any vague prompt into a precision prompt using Lyra's 4-D methodology (Deconstruct, Diagnose, Develop, Deliver). General-purpose sibling of /sn-toolkit:refine -- use when the request is NOT ServiceNow-specific (general coding, research, advisory, tooling, writing, analysis). Adapted from Lyra (github.com/creativeheadz/Lyra, MIT).
+description: Refine any vague prompt into a precision prompt using Lyra's 4-D methodology (Deconstruct, Diagnose, Develop, Deliver). Use for any vague request -- general coding, research, advisory, tooling, writing, analysis, ServiceNow work. Adapted from Lyra (github.com/creativeheadz/Lyra, MIT).
 ---
 
 Take the user's raw request from $ARGUMENTS (or from the most recent user message if $ARGUMENTS is empty). Walk through the 4-D pipeline below. Do NOT execute any work during refinement -- this command only produces a refined prompt for the user to approve.
@@ -62,5 +62,5 @@ Then ask: "Execute this, or hand back for you to edit?" Default to hand-back if 
 
 - Don't over-structure trivial questions. "What's the capital of France" does not need a 10-line refined prompt; just answer.
 - If the user has already named Goal + Audience + Output + Constraints in the raw request, collapse to a one-line summary and skip to the answer.
-- For ServiceNow-specific requests (tables, records, update sets, scopes, widgets, BRs, domains), use `/sn-toolkit:refine` instead -- it has SN-specific diagnosis steps this general version deliberately omits.
+- For ServiceNow-specific requests (tables, records, update sets, scopes, widgets, BRs, domains), incorporate those concepts into the Diagnose step -- name target table, scope, update set, domain, and expected persisted change before drafting the refined prompt.
 - This command produces a prompt; it does not execute work. Read-only research (grep, read files, web fetch) is fine for inference; mutations are not.

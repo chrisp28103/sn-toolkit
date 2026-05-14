@@ -46,7 +46,7 @@ $json = $r.result.records | ConvertTo-Json -Depth 10
 $records = Get-Content -Raw $outFile | ConvertFrom-Json
 ```
 
-Commands (`pull`, `list`, `audit`, `export`, `review`, `view-response`, `diagnose`, `refine`, `inspect`) all follow this exact shape -- only the `table` / `query` / `fields` / `limit` vary. If you ever catch yourself writing `| Out-File -Encoding utf8` or `| ConvertTo-Json | Out-File`, stop and use the snippet above.
+Commands (`pull`, `list`, `audit`, `export`, `review`, `view-response`, `diagnose`, `inspect`) all follow this exact shape -- only the `table` / `query` / `fields` / `limit` vary. If you ever catch yourself writing `| Out-File -Encoding utf8` or `| ConvertTo-Json | Out-File`, stop and use the snippet above.
 
 ## Table scope vs record scope
 

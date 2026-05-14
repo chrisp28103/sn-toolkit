@@ -30,11 +30,22 @@ bootstrap-project.ps1 -Name "<name>" -Instance "<instance>" -OutputDir "<chosen-
 
 6. Connect sn-scriptsync to the `instances/<instance>` directory (click the sn-scriptsync status-bar item in VS Code, confirm the target dir).
 
-7. Open the SN Utils helper tab in the browser on the target instance (type `/token` in ServiceNow). This is the bridge that the Agent API uses.
+7. Apply the sn-scriptsync multi-instance patch (idempotent -- no-ops if already applied). Without this, only one helper tab can connect at a time:
+   ```powershell
+   apply-snscriptsync-patch.ps1
+   ```
+   The patcher is on PATH from the plugin's `bin/`. After it runs, toggle the sn-scriptsync status-bar item (or reload the window) so the running WS server picks up the patched code. Skip this step if you already patched sn-scriptsync in another workspace today -- the patch is per-extension-install, not per-project.
 
-8. Run `/sn-toolkit:start` to verify the round-trip (scriptsync server + browser connection).
+8. Pin the active instance for this project. Writes to `.claude/project.json`'s `instance` field; the UserPromptSubmit hook reads it on every prompt:
+   ```
+   /sn-toolkit:instance <instance>
+   ```
 
-9. Optionally run `/sn-toolkit:refresh` if your project provides a `scripts/refresh-architecture.ps1` to build the initial architecture catalog.
+9. Open the SN Utils helper tab in the browser on the target instance (type `/token` in ServiceNow). This is the bridge that the Agent API uses.
+
+10. Run `/sn-toolkit:start` to verify the round-trip (scriptsync server + browser connection).
+
+11. Optionally run `/sn-toolkit:refresh` if your project provides a `scripts/refresh-architecture.ps1` to build the initial architecture catalog.
 
 ## Examples
 

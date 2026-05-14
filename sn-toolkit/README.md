@@ -10,12 +10,12 @@ A Claude Code plugin that turns any workspace into a ServiceNow development envi
   - **Write**: `create` (schema-aware pre-flight), `update` (single-field + batch), `widget` (preview+refresh loop), `sync-push` (flush + drain + error-check)
   - **Session context**: `switch` (update set / app scope / domain), `start` (surfaces active context)
   - **Visual debugging**: `inspect` (activate tab + `/tn` + screenshot), `attach` (upload files to any record)
-  - **Planning**: `refine` (SN-flavored 4-D prompt refiner -- forces naming table/scope/update-set/domain before work), `refine-prompt` (general-purpose 4-D refiner for non-SN prompts)
+  - **Planning**: `refine-prompt` (Lyra 4-D prompt refiner -- works for any vague request, including ServiceNow ones; forces naming goal/audience/output/constraints before work)
   - **Documentation**: `spec` (topic-agnostic two-part specification builder -- Part A functional + Part B technical, rendered to PDF; supports `--with-sn-pulls` for SN-anchored Part B), `docs-setup` (one-time opt-in clone of the official SN docs mirror), `docs-sync` (refresh that mirror)
   - **Operations**: `monitor` (use with `/loop 5m`), `diagnose`
 - **1 skill**: `sn-toolkit:docs` -- intent-triggered lookup against the official ServiceNow docs at github.com/servicenow/servicenowdocs (Apache 2.0). Three-tier lazy load (search -> peek -> read) keeps token usage minimal; works with or without the local cache.
 - **3 subagents**: `sn-explorer` (deep instance exploration, also consults the docs mirror for platform questions), `sn-reviewer` (code-review against SN scripting standards), and `sn-platform-admin` (instance-level concerns: ACLs, domain separation, sys_properties, update sets, email).
-- **5 hooks**: SessionStart (auto-connect to SN), PreToolUse/PostToolUse (block BOM-writes, validate encoding on sn-scriptsync files), Stop (async error check), PostCompact (re-inject session scratchpad).
+- **7 hooks**: SessionStart x2 (auto-connect to SN, keep sn-scriptsync multi-instance patch alive across extension auto-updates), UserPromptSubmit (inject active SN instance pin into every prompt), PreToolUse/PostToolUse (block BOM-writes, validate encoding on sn-scriptsync files), Stop (async error check), PostCompact (re-inject session scratchpad).
 - **3 bin scripts on PATH** while the plugin is enabled:
   - `sn-agent-api.ps1` -- thin PowerShell wrapper around SN Utils' Agent API (the browser-extension bridge)
   - `sn-credentials.ps1` -- DPAPI-encrypted credential storage for instance auth
@@ -160,6 +160,115 @@ After bootstrap, every SN project workspace looks like:
 ```
 
 Hooks auto-detect the instance by reading `<project>/instances/<first-subdir>/`, so they work identically in every workspace without any project-level config.
+
+## Multi-instance routing (v1.18.0+)
+
+`sn-scriptsync` upstream allows exactly one helper-tab WebSocket connection at a time. A second `/token` from another instance closes the first with `"Max connection"`. If you work across `dev`, `prod`, `staging`, or hop between client tenants, that meant serial context-switching, one instance at a time -- painful when an AI agent is driving.
+
+v1.18.0 lifts that limit. **Two or more helper tabs can stay connected simultaneously**, each routed to its own instance by `instance.url`. From a single Claude Code session you can query DEV and PROD in parallel, promote a script from one to the other in a single turn, or run `/sn-toolkit:compare` as a fan-out instead of a serial flip-flop.
+
+### How it works -- two layers
+
+| Layer | What it does | Where it lives |
+|---|---|---|
+| **Transport** (patch) | Removes the singleton guard in `sn-scriptsync`'s WebSocket server. Stamps each helper-tab connection with its source `instance.url`. Routes outbound messages by URL; falls back to broadcast for legacy messages without instance info. Filters error relay so `_last_error.json` only lands in the source folder. | `bin/apply-snscriptsync-patch.ps1` -- patches the installed extension's `extension.js`. Anchored by string literals (not line numbers), idempotent, reversible via `-Revert`. |
+| **Intent** (pin) | Per-project record of which instance the current Claude conversation should target for *writes*. Injected as `[Active SN instance: <name>]` into every prompt by a `UserPromptSubmit` hook, so the pin survives across turns and compaction. | `.claude/project.json` -> `"instance": "<name>"`. Read by `hooks/inject-instance-context.ps1`. |
+
+These are deliberately separate. The transport patch is per-extension-install (one machine, one patch). The intent pin is per-project (different projects can target different instances). Read operations don't need a pin -- they target whatever instance the file path or `-InstanceDir` argument names. The pin only governs ambiguous writes.
+
+### One-time setup per machine
+
+`apply-snscriptsync-patch.ps1` ships on PATH while the plugin is enabled. The bootstrap (`/sn-toolkit:new-project`) runs it automatically on step 7. To apply manually:
+
+```powershell
+apply-snscriptsync-patch.ps1            # apply (creates extension.js.bak first)
+apply-snscriptsync-patch.ps1 -DryRun    # show what would change, no write
+apply-snscriptsync-patch.ps1 -Revert    # restore the unpatched extension
+```
+
+After applying, **toggle the sn-scriptsync status-bar item off and on** (or reload the IDE window). The on-disk file is patched, but the running WS server is still pre-patch until it restarts.
+
+A `SessionStart` hook (`hooks/scriptsync-patch-check.ps1`) counts the patch markers in the live `extension.js` every time a Claude session starts. If `sn-scriptsync` auto-updated and the markers are gone, the hook reapplies the patch silently and emits a one-line banner notice telling you to reload the extension. If the markers are partially present (upstream refactored an anchor block), the hook surfaces a red warning and does NOT auto-fix -- the anchors in `apply-snscriptsync-patch.ps1` need to be updated to match the new shape.
+
+### Per-conversation use
+
+The `/sn-toolkit:instance` skill manages the pin:
+
+```
+/sn-toolkit:instance                # list instances, show current, prompt to pick
+/sn-toolkit:instance dev            # pin to instances/dev/
+/sn-toolkit:instance show           # display current pin only, no write
+```
+
+The chosen name is written to `.claude/project.json`'s `instance` field. Every subsequent prompt arrives with `[Active SN instance: dev] -- pushes/edits/creates should target this instance unless the user explicitly says otherwise.` injected as a system reminder.
+
+Switching mid-session is just `/sn-toolkit:instance <other-name>`. The pin takes effect on the NEXT prompt (the current turn already happened).
+
+### Workspace layout for multi-instance
+
+```
+<project>/
+|-- instances/
+|   |-- dev/
+|   |   |-- _settings.json          (sn-scriptsync workspace settings)
+|   |   `-- agent/{requests,responses}/
+|   `-- prod/
+|       |-- _settings.json
+|       `-- agent/{requests,responses}/
+|-- .claude/
+|   `-- project.json                (contains "instance": "dev")
+`-- CLAUDE.md
+```
+
+Each `instances/<name>/` is its own sn-scriptsync workspace. Connect sn-scriptsync to **one** of them at a time per IDE window, OR run two IDE windows pointed at different instance dirs, OR (the original motivation) connect a single IDE workspace to multiple instances by having multiple browser helper tabs open -- each tab's `_token` succeeds because the patch removed the singleton guard.
+
+### Daily workflow examples
+
+**Dev -> Prod parity audit, parallel fan-out:**
+```
+/sn-toolkit:instance dev                                    # pin writes to dev
+/sn-toolkit:compare <spec>                                  # queries BOTH instances in parallel via separate helper tabs
+```
+
+**Hot-fix promote in one turn (galaxy brain):**
+```
+/sn-toolkit:instance dev                                    # write target is dev
+/sn-toolkit:update <table> <sys_id> <field> <new-content>   # lands in dev
+# verify the change is good, then:
+/sn-toolkit:instance prod                                   # flip pin
+/sn-toolkit:update <table> <sys_id> <field> <new-content>   # lands in prod
+```
+
+**Cross-instance debugging:**
+```
+/sn-toolkit:pull <record-name>                              # pulls from current pin (dev)
+# look at the script, find a referenced table that exists in prod but not dev
+/sn-toolkit:instance prod
+/sn-toolkit:pull <related-record>                           # pulls from prod
+# now you have both side-by-side without context-switching helper tabs
+```
+
+### When things break
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Banner notice at session start: "patch was missing... reapplied automatically" | sn-scriptsync auto-updated. Patch was applied to the OLD `extension.js`; the new version has no markers. | Hook already reapplied. Toggle the sn-scriptsync status-bar item off and on to load the patched code into the running WS server. |
+| Banner notice: "PARTIAL state (3 / 5 markers)" | Upstream refactored a `wss.on(connection)` / `broadcastToHelperTab` / `relayErrorToAgent` block. Some anchors still match, some don't. | Open `bin/apply-snscriptsync-patch.ps1`, find the anchor string that no longer matches the current `extension.js`, update it, run `apply-snscriptsync-patch.ps1 -DryRun` to confirm, then apply. File an issue with the upstream version number so the plugin's anchors can ship updated. |
+| `[sn-instance] .claude/project.json names instance 'X' but instances\X\_settings.json is missing` | Instance dir was renamed/deleted while the pin still references it. | Run `/sn-toolkit:instance` (no args) to re-pick from the current set of instances. |
+| Two helper tabs, second one closes with "Max connection" anyway | Patched `extension.js` on disk, but the running server didn't pick it up. | Toggle the sn-scriptsync status bar item, or reload the IDE window. The patcher's stdout reminds you on every apply. |
+| Second helper tab connects but `check_connection` from one instance dir times out | The wrong helper tab is bound to that instance's URL. The `_token` request stamps `ws.instanceUrl` -- if you opened the tab pointed at the wrong instance and accepted `/token`, it's stamped wrong. | Close the misbound tab. Re-open it on the correct instance. Type `/token` again to re-identify. |
+| Pin says `dev` but write went to `prod` | Pin is **instruction, not enforcement**. The hook prefixes the prompt; Claude reads it and SHOULD honor it, but a tool call that explicitly names `-InstanceDir instances\prod` will still execute. | Use `/sn-toolkit:instance dev` proactively before pushes. Hard enforcement (block prod writes when pin is dev) is planned for a future release via the existing tool-guard hook. |
+
+### Caveats
+
+- **Same-profile cookie jar**: two helper tabs in the same Chrome profile share cookies. If both instances use the same SSO host, you could authenticate to one and inadvertently be authenticated to the other. **Use separate Chrome profiles per instance** when working across security boundaries.
+- **`extension.js.bak` is the rollback**: the patcher backs up the original on first apply and never overwrites the backup. `-Revert` always restores the byte-exact original.
+- **Per-extension-install, not per-project**: the patch lives in `~/.vscode/extensions/arnoudkooicom.sn-scriptsync-<ver>/out/extension.js` (or the Antigravity equivalent). One patch covers every project on the machine. You don't need to re-patch when switching workspaces.
+- **The pin is INSTRUCTION, not enforcement**: Claude reads `[Active SN instance: X]` as guidance. If you're collaborating with a model that decides to override it, the tool call still executes. Keep an eye on outputs that name the wrong instance.
+
+### Credits
+
+The multi-instance routing patch was designed by Matthew (independent contributor) and contributed back. v1.18.0 ports it into the plugin's `bin/` and reconciles the skills/hooks layer with sn-toolkit's existing instance-resolution stack (`Resolve-SnInstance`, `.claude/project.json.instance`). The original standalone kit lives separately and the upstream `sn-scriptsync` extension is unmodified at source -- only the installed compiled file is patched.
 
 ## Updating the plugin
 

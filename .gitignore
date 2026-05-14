@@ -15,5 +15,9 @@ desktop.ini
 cache/
 installed_plugins.json
 
+# Workspace-scoped Claude Code config (per-developer permissions, hooks, etc.)
+# The TRACKED plugin manifest lives in .claude-plugin/ -- different dir, intentionally tracked.
+.claude/
+
 # Node (if anyone adds tooling)
 node_modules/

@@ -7,6 +7,8 @@ allowed-tools: [Read, Bash]
 
 Use `$api` and `$instanceDir` from CLAUDE.md "Agent API Setup".
 
+> **Multi-instance note (v1.18.0+):** if `instances/` contains more than one subdir with a `_settings.json`, you can run Steps 1-4 in parallel against each instance dir. The sn-scriptsync multi-instance patch lets both helper tabs stay connected at once. Confirm the active pin first via `/sn-toolkit:instance`; that's where pushes/edits will target unless the user explicitly says otherwise.
+
 ## Step 1: Verify connection
 
 **Skip Steps 1 and 3 if the SessionStart snapshot in your context already shows `server=True, browser=True, errors cleared`** -- the hook ran `check_connection` and `clear_last_error` for you. Jump to Step 2. Only run the commands below if the snapshot is missing, stale (e.g. after compaction), or shows either flag false.

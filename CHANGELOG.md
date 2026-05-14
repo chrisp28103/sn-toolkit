@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.0] - 2026-05-14
+
+### Added
+- `bin/apply-snscriptsync-patch.ps1` -- patches the installed `arnoudkooicom.sn-scriptsync` extension's `out/extension.js` to support **multiple simultaneous helper-tab connections**, one per ServiceNow instance. Removes the `wss.clients.size > 1` singleton guard, stamps `ws.instanceName`/`ws.instanceUrl` per connection from the helper-tab's identifying message, routes `broadcastToHelperTab` by `messageObj.instance.url` (with broadcast fallback for legacy messages), and filters `relayErrorToAgent` so `_last_error.json` only lands in the source instance's folder. Anchored by string literals, idempotent (marker check), reversible (`.bak` + `-Revert`), fail-loud on upstream refactors. Auto-detects Antigravity / VS Code / VS Code Insiders install paths. Original patch design by Matthew (independent contributor); ported into the plugin under `bin/` and instrumented with `$ExpectedMarkers` + `Get-ExpectedMarkerCount` so dependent hooks/skills can verify state without hardcoding the marker count.
+- `hooks/scriptsync-patch-check.ps1` -- new `SessionStart` hook (second group, runs after `session-start.ps1`). Counts patch markers in the live `extension.js`, dot-sources the patcher to read the expected count, and: silent on full patch, auto-reapplies on `markers=0` (extension auto-update), red warning on partial state (upstream refactor touched some anchors but not all). Output goes to `hookSpecificOutput.additionalContext` so notices appear in the session-start banner only when there's something to say.
+- `hooks/inject-instance-context.ps1` -- new `UserPromptSubmit` hook. Reads `.claude/project.json`'s `instance` field and prefixes every prompt with `[Active SN instance: <name>]` so multi-turn work can't drift to the wrong instance. Silent when no instance is pinned; warns when the pinned instance's folder is missing.
+- `commands/instance.md` -- new `/sn-toolkit:instance` skill. Sets/switches/displays the active instance pin. Reuses the existing `.claude/project.json.instance` field (rather than introducing a separate `.sn-active-instance` file) so the pin layers cleanly on top of `Resolve-SnInstance` in `hooks/_common.ps1`. Validates against `instances/<name>/_settings.json` before writing; preserves all other fields in `project.json` via `ConvertFrom-Json`/`ConvertTo-Json` (no string substitution).
+
+### Changed
+- `hooks/hooks.json` -- registered the new SessionStart group (`scriptsync-patch-check.ps1`, 15s timeout, statusMessage "Checking scriptsync multi-instance patch...") and the new `UserPromptSubmit` event with `inject-instance-context.ps1` (5s timeout, no statusMessage -- runs on every prompt, keep quiet). SessionStart group ordering preserved: `session-start.ps1` runs first, then patch-check.
+- `commands/new-project.md` -- inserts two steps between connecting sn-scriptsync and opening the helper tab: (7) apply the multi-instance patch via `apply-snscriptsync-patch.ps1` (idempotent, no-ops if already applied), and (8) pin the active instance via `/sn-toolkit:instance <name>`. Original steps 7-9 renumbered to 9-11. Without step 7, only one helper tab can connect at a time -- the singleton guard remains in place.
+- `commands/start.md` -- added a top-of-skill note that, with the v1.18.0 patch live, Steps 1-4 can fan out in parallel against multiple `instances/<name>/` dirs. The single-instance verification logic itself is unchanged; it just works per-instance now.
+
+### Removed
+- `/sn-toolkit:refine` -- the ServiceNow-flavored Lyra 4-D prompt refiner. `/sn-toolkit:refine-prompt` is now the single universal refiner; its Diagnose-step guidance was broadened to include ServiceNow-specific concepts (table, scope, update set, domain, expected persisted change), making the SN-only sibling redundant. Update `sn-toolkit/rules/conventions.md` to drop `refine` from the listed read-command shape examples, and `sn-toolkit/README.md`'s "Planning" bullet to mention only `refine-prompt`.
+
+### Credits
+- Multi-instance routing patch design by Matthew (independent contributor). The patcher's anchor strings and patch semantics are his work; this release ports them into the plugin's `bin/` and reconciles his skills/hooks layer with sn-toolkit's existing instance-resolution stack (`Resolve-SnInstance`, `.claude/project.json.instance`).
+
 ## [1.17.0] - 2026-05-11
 
 ### Fixed
@@ -187,6 +206,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.16.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.1
 [1.16.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.0
 [1.15.2]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.2
+[1.18.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.18.0
+[1.17.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.17.0
+[1.16.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.1
+[1.16.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.16.0
 [1.15.1]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.1
 [1.15.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.15.0
 [1.14.0]: https://github.com/chrisp28103/sn-toolkit/releases/tag/v1.14.0

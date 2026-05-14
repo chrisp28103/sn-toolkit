@@ -11,6 +11,29 @@
             "statusMessage": "Connecting to ServiceNow..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/scriptsync-patch-check.ps1\"",
+            "shell": "powershell",
+            "timeout": 15,
+            "statusMessage": "Checking scriptsync multi-instance patch..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/inject-instance-context.ps1\"",
+            "shell": "powershell",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PreToolUse": [
